@@ -12,7 +12,6 @@ angular_speed = .005
 local moving, aiming, leaping = 0, 1, 2
 
 p = {}
-p.a = 0 -- angle from center of pond
 p.x = 0
 p.y = 0
 p.state = moving
@@ -44,16 +43,18 @@ end
 
 function update_player_angle()
   updated = false
+  angle = pl_coord_to_ang(p.x, p.y)
 
   if (btn(0)) then
-    p.a+=angular_speed
-    if p.a > 1 then p.a = 0 end
+    angle+=angular_speed
+    if angle > 1 then angle = 0 end
     
     p.ccw = true
     updated = true
   elseif (btn(1)) then
-    p.a-=angular_speed
-    if p.a < 0 then p.a = 1 end
+    if angle == 0 then angle = 1 end
+    angle-=angular_speed
+    if angle < 0 then angle = 1 end
 
     p.ccw = false
     updated = true
@@ -72,7 +73,7 @@ function update_player_angle()
     p.sprite = p_sprite_start
   end
 
-  p.x, p.y = ang_to_pl_coord(p.a)
+  p.x, p.y = ang_to_pl_coord(angle)
   p.flip =
     (p.y > circ_orig and not p.ccw) or
     (p.y <= circ_orig and p.ccw)
@@ -103,8 +104,6 @@ function _draw()
   circfill(circ_orig,circ_orig,55,12)
 
   spr(p.sprite,p.x,p.y,1,1,p.flip) 
-
-  print(p.a .. '/' .. pl_coord_to_ang(p.x, p.y))
 end
 __gfx__
 00000000777777770000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
