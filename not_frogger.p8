@@ -15,6 +15,8 @@ p = {}
 p.x = 0
 p.y = 0
 p.state = moving
+p.aim_speed = angular_speed
+p.aim = 0
 p.sprite = p_sprite_start
 p.timer = 0
 p.flip = false
@@ -41,7 +43,15 @@ function pl_coord_to_ang(x, y)
   return atan2(x - circ_orig + 3, y - circ_orig + 3)
 end
 
-function update_player_angle()
+function min_aim_angle()
+  return atan2(circ_orig - p.x + 3, circ_orig - p.y + 3) - 0.125
+end
+
+function max_aim_angle()
+  return min_aim_angle() + 0.25
+end
+
+function handle_player_movement()
   updated = false
   angle = pl_coord_to_ang(p.x, p.y)
 
@@ -79,22 +89,33 @@ function update_player_angle()
     (p.y <= circ_orig and p.ccw)
 end
 
-function update_player_aiming()
-  if btn(4) then p.state = aiming end
+function setup_aim()
+  p.state = aiming
+  p.aim = min_aim_angle()
+  p.aim_speed = angular_speed
 end
 
 function _update()
   if (p.state == moving) then
-    update_player_angle()
-    update_player_aiming()
-  end
+    handle_player_movement()
 
-  if (p.state == aiming) then
-    -- press z to confirm
-    -- press x to cancel
-  end
+    -- press z to aim
+    if btn(4) then setup_aim() end
+  elseif (p.state == aiming) then
+    if btn(5) then
+      -- press x to cancel
+      p.state = moving
+    elseif btn(4) then
+      -- press z to confirm
+    else
+      -- update cursor
+      p.aim += p.aim_speed
 
-  if (p.state == leaping) then
+      if (p.aim > max_aim_angle()) or (p.aim < min_aim_angle()) then
+        p.aim_speed = -p.aim_speed
+      end
+    end
+  elseif (p.state == leaping) then
     -- update player location
   end
 end
@@ -104,6 +125,12 @@ function _draw()
   circfill(circ_orig,circ_orig,55,12)
 
   spr(p.sprite,p.x,p.y,1,1,p.flip) 
+
+  if p.state == aiming then
+    aim_x=p.x + 200 * cos(p.aim)
+    aim_y=p.y + 200 * sin(p.aim)
+    line(p.x + 3, p.y + 3, aim_x, aim_y, 8)
+  end
 end
 __gfx__
 00000000777777770000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
