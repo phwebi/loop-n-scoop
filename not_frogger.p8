@@ -32,28 +32,39 @@ function _init()
   p.x, p.y = ang_to_pl_coord(0)
 end
 
-function ang_to_pl_coord(angle)
-  x=circ_orig + circ_r * cos(angle) - 3
-  y=circ_orig + circ_r * sin(angle) - 3
+function pl_coord_centered()
+  return p.x + 3, p.y + 3
+end
 
-  return x, y
+function ang_to_pl_coord(angle)
+  x_centered=circ_orig + circ_r * cos(angle)
+  y_centered=circ_orig + circ_r * sin(angle)
+
+  return x_centered - 3, y_centered - 3
 end
 
 function pl_coord_to_ang(x, y)
-  return atan2(x - circ_orig + 3, y - circ_orig + 3)
+  return atan2(x - circ_orig, y - circ_orig)
 end
 
 function min_aim_angle()
-  return atan2(circ_orig - p.x + 3, circ_orig - p.y + 3) - 0.125
+  x, y = pl_coord_centered()
+  return atan2(circ_orig - x, circ_orig - y) - 0.125
 end
 
 function max_aim_angle()
   return min_aim_angle() + 0.25
 end
 
+function is_on_circle(x, y)
+  d = sqrt((x - circ_orig)*(x - circ_orig) + (y - circ_orig)*(y - circ_orig))
+  printh(d)
+  return abs(d - circ_r) < 1
+end
+
 function handle_player_movement()
   updated = false
-  angle = pl_coord_to_ang(p.x, p.y)
+  angle = pl_coord_to_ang(pl_coord_centered())
 
   if (btn(0)) then
     angle+=angular_speed
@@ -99,16 +110,13 @@ function _update()
   if (p.state == moving) then
     handle_player_movement()
 
-    -- press z to aim
-    if btn(4) then setup_aim() end
+    if btnp(4) then setup_aim() end -- press z to aim
   elseif (p.state == aiming) then
-    if btn(5) then
-      -- press x to cancel
+    if btnp(5) then -- press x to cancel
       p.state = moving
-    elseif btn(4) then
-      -- press z to confirm
-    else
-      -- update cursor
+    elseif btnp(4) then -- press z to confirm
+      p.state = leaping
+    else -- update cursor
       p.aim += p.aim_speed
 
       if (p.aim > max_aim_angle()) or (p.aim < min_aim_angle()) then
@@ -117,6 +125,10 @@ function _update()
     end
   elseif (p.state == leaping) then
     -- update player location
+    p.x += 2 * cos(p.aim)
+    p.y += 2 * sin(p.aim)
+
+    if is_on_circle(pl_coord_centered()) then p.state = moving end
   end
 end
 
@@ -129,7 +141,8 @@ function _draw()
   if p.state == aiming then
     aim_x=p.x + 200 * cos(p.aim)
     aim_y=p.y + 200 * sin(p.aim)
-    line(p.x + 3, p.y + 3, aim_x, aim_y, 8)
+    x, y = pl_coord_centered()
+    line(x, y, aim_x, aim_y, 8)
   end
 end
 __gfx__
