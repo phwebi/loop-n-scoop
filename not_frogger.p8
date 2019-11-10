@@ -1,16 +1,21 @@
 pico-8 cartridge // http://www.pico-8.com
 version 18
 __lua__
+circ_orig = 63
+circ_r = 59
 
 p_sprite_start=16
 p_sprite_end=20
 anim_wait=2
-angular_speed = 1.2
+angular_speed = .005
+
+local moving, aiming, leaping = 0, 1, 2
 
 p = {}
 p.a = 0 -- angle from center of pond
 p.x = 0
 p.y = 0
+p.state = moving
 p.sprite = p_sprite_start
 p.timer = 0
 p.flip = false
@@ -22,24 +27,41 @@ function _init()
  
   -- don't draw red pixels
   palt(8, true)
+
+  p.x, p.y = ang_to_pl_coord(0)
+end
+
+function ang_to_pl_coord(angle)
+  x=circ_orig + circ_r * cos(angle) - 3
+  y=circ_orig + circ_r * sin(angle) - 3
+
+  return x, y
+end
+
+function pl_coord_to_ang(x, y)
+  return atan2(x - circ_orig + 3, y - circ_orig + 3)
 end
 
 function update_player_angle()
+  updated = false
+
   if (btn(0)) then
-    p.a=p.a+angular_speed
+    p.a+=angular_speed
+    if p.a > 1 then p.a = 0 end
+    
     p.ccw = true
-    p.timer+=1
+    updated = true
+  elseif (btn(1)) then
+    p.a-=angular_speed
+    if p.a < 0 then p.a = 1 end
+
+    p.ccw = false
+    updated = true
   end
 
-  if (btn(1)) then
-    p.a=p.a-angular_speed
-    p.ccw = false
-    p.timer+=1
-  end
+  if not updated then return end
   
-  if (p.a > 360 or p.a < -360) then
-    p.a = 0
-  end
+  p.timer+=1
 
   if p.timer > anim_wait then
     p.sprite+=1
@@ -49,26 +71,40 @@ function update_player_angle()
   if p.sprite > p_sprite_end then
     p.sprite = p_sprite_start
   end
+
+  p.x, p.y = ang_to_pl_coord(p.a)
+  p.flip =
+    (p.y > circ_orig and not p.ccw) or
+    (p.y <= circ_orig and p.ccw)
 end
 
-function 
+function update_player_aiming()
+  if btn(4) then p.state = aiming end
+end
 
 function _update()
-  update_player_angle()
+  if (p.state == moving) then
+    update_player_angle()
+    update_player_aiming()
+  end
+
+  if (p.state == aiming) then
+    -- press z to confirm
+    -- press x to cancel
+  end
+
+  if (p.state == leaping) then
+    -- update player location
+  end
 end
 
 function _draw()
   map(0,0,0,0,16,16)
-  circfill(63,63,55,12)
-  -- pset(63,63,0)
-  
-  p.x=63 + 59 * cos(p.a/360) - 3
-  p.y=63 + 59 * sin(p.a/360) - 3
-		p.flip =
-		  (p.y > 63 and not p.ccw) or
-		  (p.y <= 63 and p.ccw)
+  circfill(circ_orig,circ_orig,55,12)
 
-  spr(p.sprite,p.x,p.y,1,1,p.flip)
+  spr(p.sprite,p.x,p.y,1,1,p.flip) 
+
+  print(p.a .. '/' .. pl_coord_to_ang(p.x, p.y))
 end
 __gfx__
 00000000777777770000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
