@@ -3,9 +3,10 @@ version 18
 __lua__
 -- map
 circ_orig = 63
-circ_r = 59
+circ_r = 55
 
 -- player
+p_radius = 59
 p_sprite_start=16
 p_sprite_end=20
 anim_wait=2
@@ -33,6 +34,8 @@ p.score = 0
 -- pickups
 pickup_sprites_start = 2
 pickup_sprites_end = 8
+bob_wait = 10
+pickup_speed = 0.2
 
 function _init()
   -- draw black pixels
@@ -47,25 +50,13 @@ function _init()
   add_pickup()
 end
 
-function add_pickup()
-  local pick = {}
-  pick.sprite = flr(rnd(pickup_sprites_end - pickup_sprites_start)) + pickup_sprites_start
-  
-  r = (circ_r - 10) * sqrt(rnd(1))
-  theta = rnd(1) * 2 * 3.14159
-  pick.x = circ_orig + r * cos(theta)
-  pick.y = circ_orig + r * sin(theta)
-
-  add(pickup, pick)
-end
-
 function pl_coord_centered()
   return p.x + 3, p.y + 3
 end
 
 function ang_to_pl_coord(angle)
-  x_centered=circ_orig + circ_r * cos(angle)
-  y_centered=circ_orig + circ_r * sin(angle)
+  x_centered=circ_orig + p_radius * cos(angle)
+  y_centered=circ_orig + p_radius * sin(angle)
 
   return x_centered - 3, y_centered - 3
 end
@@ -83,9 +74,57 @@ function max_aim_angle() -- 90 deg aim range
   return min_aim_angle() + 0.25
 end
 
-function is_on_circle(x, y)
-  d = sqrt((x - circ_orig)*(x - circ_orig) + (y - circ_orig)*(y - circ_orig))
-  return abs(d - circ_r) < 1
+function dist_from_origin(x_o, y_o, x, y)
+  return sqrt((x - x_o)*(x - x_o) + (y - y_o)*(y - y_o))
+end
+
+function on_circle(x_o, y_o, x, y, r)
+  d = dist_from_origin(x_o, y_o, x, y)
+  return abs(d - r) < 1 -- allow for margin of error
+end
+
+function rand_point_in_circle(originx, originy, radius)
+  r = radius * sqrt(rnd(1))
+  theta = rnd(1) * 2 * 3.14159
+  x = originx + r * cos(theta)
+  y = originy + r * sin(theta)
+
+  return x, y
+end
+
+function add_pickup()
+  local o = {}
+  o.sprite = flr(rnd(pickup_sprites_end - pickup_sprites_start)) + pickup_sprites_start
+  o.x, o.y = rand_point_in_circle(circ_orig, circ_orig, circ_r - 8)
+  o.timer = 0
+  o.direction = rnd(1) -- angular direction
+
+  add(pickup, o)
+end
+
+function handle_pickup_movement(o)
+  x = o.x + pickup_speed * cos(o.direction)
+  y = o.y + pickup_speed * sin(o.direction)
+
+  if on_circle(circ_orig, circ_orig, x, y, circ_r - 8) then
+    o.direction = rnd(1)
+  else
+    o.x, o.y = x, y
+  end
+
+  animate_pickup(o)
+end
+
+function animate_pickup(o)
+  o.timer += 1
+
+  if o.timer == 2*bob_wait then o.timer = 0 end
+
+  if (o.timer == 0) then
+    o.y+=1
+  elseif (o.timer == bob_wait) then
+    o.y-=1
+  end
 end
 
 function animate_player(sprite_start, sprite_end)
@@ -180,7 +219,8 @@ function _update()
     p.x += leap_speed * cos(p.aim)
     p.y += leap_speed * sin(p.aim)
 
-    if is_on_circle(pl_coord_centered()) then
+    x, y = pl_coord_centered()
+    if on_circle(circ_orig, circ_orig, x, y, p_radius) then
       p.state = moving
       p.sprite = p_sprite_start
       p.timer = 0
@@ -190,6 +230,8 @@ function _update()
 
     foreach(pickup, handle_pickup)
   end
+
+  foreach(pickup, handle_pickup_movement)
 
   if #pickup < 1 then
     add_pickup()
@@ -202,8 +244,8 @@ end
 
 function _draw()
   map(0,0,0,0,16,16)
-  circfill(circ_orig,circ_orig,55,1)
-  circ(circ_orig, circ_orig, 55, 6)
+  circfill(circ_orig,circ_orig,circ_r,1)
+  circ(circ_orig, circ_orig, circ_r, 6)
 
   -- spr(ice_sprite, 63, 63)
   foreach(pickup, draw_actor)
