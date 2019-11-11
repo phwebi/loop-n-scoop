@@ -28,6 +28,7 @@ p.sprite = p_sprite_start
 p.timer = 0
 p.flip = false
 p.ccw = false
+p.score = 0
 
 -- pickups
 pickup_sprites_start = 2
@@ -135,6 +136,27 @@ function setup_aim()
   p.aim_speed = aim_speed
 end
 
+function collide(o1, o2)
+  local l = max(o1.x, o2.x)
+  local r = min(o1.x+8,  o2.x+8)
+  local t = max(o1.y,o2.y)
+  local b = min(o1.y+8,  o2.y+8)
+
+  -- they overlapped if the area of intersection is greater than 0
+  if l < r and t < b then
+    return true
+  end
+					
+	return false
+end	
+
+function handle_pickup(obj)
+  if collide(obj, p) then
+    p.score+=1
+    del(pickup, obj)
+  end
+end
+
 function _update()
   if (p.state == moving) then
     handle_player_movement()
@@ -165,6 +187,12 @@ function _update()
     else
       animate_player(p_leap_sprite_start, p_leap_sprite_end)
     end
+
+    foreach(pickup, handle_pickup)
+  end
+
+  if #pickup < 1 then
+    add_pickup()
   end
 end
 
@@ -188,6 +216,8 @@ function _draw()
     x, y = pl_coord_centered()
     line(x, y, aim_x, aim_y, 8)
   end
+
+  print(p.score, 112, 4, 1)
 end
 __gfx__
 0000000077777777ccceeeccccc999cccccdddccccc444cccccfffccccc333ccccc888cc00000000000000000000000000000000000000000000000000000000
