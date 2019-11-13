@@ -53,7 +53,7 @@ function _init()
 
   p.x, p.y = ang_to_pl_coord(0)
 
-  pickup = {}
+  pickups = {}
   add_pickup()
 end
 
@@ -106,7 +106,7 @@ function add_pickup()
   o.timer = 0
   o.direction = rnd(1) -- angular direction
 
-  add(pickup, o)
+  add(pickups, o)
 end
 
 function handle_pickup_movement(o)
@@ -199,7 +199,7 @@ end
 function handle_pickup(obj)
   if collide(obj, p) then
     p.score+=1
-    del(pickup, obj)
+    del(pickups, obj)
   end
 end
 
@@ -235,12 +235,12 @@ function _update()
       animate_player(p_leap_sprite_start, p_leap_sprite_end)
     end
 
-    foreach(pickup, handle_pickup)
+    foreach(pickups, handle_pickup)
   end
 
-  foreach(pickup, handle_pickup_movement)
+  foreach(pickups, handle_pickup_movement)
 
-  if #pickup < 1 then
+  if #pickups < 1 then
     add_pickup()
   end
 end
@@ -255,7 +255,7 @@ function _draw()
   circ(circ_orig, circ_orig, circ_r, 6)
 
   -- spr(ice_sprite, 63, 63)
-  foreach(pickup, draw_actor)
+  foreach(pickups, draw_actor)
 
   spr(p.sprite,p.x,p.y,1,1,p.flip) 
 
