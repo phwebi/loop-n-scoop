@@ -47,6 +47,13 @@ pickup_sprites_end = 8
 bob_wait = 10
 pickup_speed = 0.2
 
+-- enemies
+local rock, seal = 0, 1
+
+rock_sprite = 49
+seal_sprite_start = 32
+seal_sprite_end = 34
+
 function _init()
   -- draw black pixels
   palt(0, false)
@@ -59,22 +66,12 @@ function _init()
   pickups = {}
   enemies = {}
   add_pickup()
-  add_enemy("rock")
+  add_enemy(rock)
+  add_enemy(seal)
 end
 
 function pl_coord_centered()
   return p.x + 3, p.y + 3
-end
-
-function ang_to_pl_coord(angle)
-  x_centered=circ_orig + p_radius * cos(angle)
-  y_centered=circ_orig + p_radius * sin(angle)
-
-  return x_centered - 3, y_centered - 3
-end
-
-function pl_coord_to_ang(x, y)
-  return atan2(x - circ_orig, y - circ_orig)
 end
 
 function min_aim_angle() -- 90 deg aim range
@@ -84,24 +81,6 @@ end
 
 function max_aim_angle() -- 90 deg aim range
   return min_aim_angle() + 0.25
-end
-
-function dist_from_origin(x_o, y_o, x, y)
-  return sqrt((x - x_o)*(x - x_o) + (y - y_o)*(y - y_o))
-end
-
-function on_circle(x_o, y_o, x, y, r)
-  d = dist_from_origin(x_o, y_o, x, y)
-  return abs(d - r) < 1 -- allow for margin of error
-end
-
-function rand_point_in_circle(originx, originy, radius)
-  r = radius * sqrt(rnd(1))
-  theta = rnd(1) * 2 * 3.14159
-  x = originx + r * cos(theta)
-  y = originy + r * sin(theta)
-
-  return x, y
 end
 
 function add_pickup()
@@ -116,11 +95,14 @@ end
 
 function add_enemy(enemy_type)
   local enemy = {}
-  if enemy_type == "rock" then
-    enemy.sprite = 49 -- rock
+  if enemy_type == rock then
+    enemy.sprite = rock_sprite
     enemy.x, enemy.y = rand_point_in_circle(circ_orig, circ_orig, circ_r - 8)
-  elseif enemy_type == "seal" then
-    -- TBD
+  elseif enemy_type == seal then
+    enemy.sprite = seal_sprite_start
+    enemy.h = 1
+    enemy.w = 2
+    enemy.x, enemy.y = ang_to_pl_coord(0.5)
   end
 
   add(enemies, enemy)
@@ -199,20 +181,6 @@ function setup_aim()
   p.aim_speed = aim_speed
 end
 
-function collide(o1, o2)
-  local l = max(o1.x, o2.x)
-  local r = min(o1.x+8,  o2.x+8)
-  local t = max(o1.y,o2.y)
-  local b = min(o1.y+8,  o2.y+8)
-
-  -- they overlapped if the area of intersection is greater than 0
-  if l < r and t < b then
-    return true
-  end
-					
-	return false
-end	
-
 function handle_pickup(obj)
   if collide(obj, p) then
     p.score+=1
@@ -271,7 +239,7 @@ function _update()
 end
 
 function draw_actor(a)
-  spr(a.sprite,a.x,a.y) 
+  spr(a.sprite,a.x,a.y, a.w or 1, a.h or 1) 
 end
 
 function _draw()
@@ -297,6 +265,51 @@ function _draw()
 
   print(p.score, 112, 4, 1)
 end
+
+-- utils
+function dist_from_origin(x_o, y_o, x, y)
+  return sqrt((x - x_o)*(x - x_o) + (y - y_o)*(y - y_o))
+end
+
+function on_circle(x_o, y_o, x, y, r)
+  d = dist_from_origin(x_o, y_o, x, y)
+  return abs(d - r) < 1 -- allow for margin of error
+end
+
+function rand_point_in_circle(originx, originy, radius)
+  r = radius * sqrt(rnd(1))
+  theta = rnd(1) * 2 * 3.14159
+  x = originx + r * cos(theta)
+  y = originy + r * sin(theta)
+
+  return x, y
+end
+
+function ang_to_pl_coord(angle)
+  x_centered=circ_orig + p_radius * cos(angle)
+  y_centered=circ_orig + p_radius * sin(angle)
+
+  return x_centered - 3, y_centered - 3
+end
+
+function pl_coord_to_ang(x, y)
+  return atan2(x - circ_orig, y - circ_orig)
+end
+
+function collide(o1, o2)
+  local l = max(o1.x, o2.x)
+  local r = min(o1.x+8,  o2.x+8)
+  local t = max(o1.y,o2.y)
+  local b = min(o1.y+8,  o2.y+8)
+
+  -- they overlapped if the area of intersection is greater than 0
+  if l < r and t < b then
+    return true
+  end
+					
+	return false
+end	
+
 __gfx__
 0000000077777777ccceeeccccc999cccccdddccccc444cccccfffccccc333ccccc888cc00000000000000000000000000033000000000000000000000000000
 0000000077777767cceef7eccc99a79cccdd67dccc44f74cccffa7fccc33b73ccc88e78c000000000000000000000000000bb000000000000000000000000000
