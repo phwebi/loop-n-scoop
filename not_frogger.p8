@@ -53,6 +53,7 @@ local rock, seal = 0, 1
 rock_sprite = 49
 seal_sprite_start = 32
 seal_sprite_end = 34
+seal_speed = .003
 
 function _init()
   -- draw black pixels
@@ -70,6 +71,7 @@ function _init()
   add_enemy(seal)
 end
 
+-- player functions
 function pl_coord_centered()
   return p.x + 3, p.y + 3
 end
@@ -81,56 +83,6 @@ end
 
 function max_aim_angle() -- 90 deg aim range
   return min_aim_angle() + 0.25
-end
-
-function add_pickup()
-  local o = {}
-  o.sprite = flr(rnd(pickup_sprites_end - pickup_sprites_start + 1)) + pickup_sprites_start
-  o.x, o.y = rand_point_in_circle(circ_orig, circ_orig, circ_r - 8)
-  o.timer = 0
-  o.direction = rnd(1) -- angular direction
-
-  add(pickups, o)
-end
-
-function add_enemy(enemy_type)
-  local enemy = {}
-  if enemy_type == rock then
-    enemy.sprite = rock_sprite
-    enemy.x, enemy.y = rand_point_in_circle(circ_orig, circ_orig, circ_r - 8)
-  elseif enemy_type == seal then
-    enemy.sprite = seal_sprite_start
-    enemy.h = 1
-    enemy.w = 2
-    enemy.x, enemy.y = ang_to_pl_coord(0.5)
-  end
-
-  add(enemies, enemy)
-end
-
-function handle_pickup_movement(o)
-  x = o.x + pickup_speed * cos(o.direction)
-  y = o.y + pickup_speed * sin(o.direction)
-
-  if on_circle(circ_orig, circ_orig, x, y, circ_r - 8) then
-    o.direction = rnd(1)
-  else
-    o.x, o.y = x, y
-  end
-
-  animate_pickup(o)
-end
-
-function animate_pickup(o)
-  o.timer += 1
-
-  if o.timer == 2*bob_wait then o.timer = 0 end
-
-  if (o.timer == 0) then
-    o.y+=1
-  elseif (o.timer == bob_wait) then
-    o.y-=1
-  end
 end
 
 function animate_player(sprite_start, sprite_end)
@@ -181,6 +133,17 @@ function setup_aim()
   p.aim_speed = aim_speed
 end
 
+-- pickup functions
+function add_pickup()
+  local o = {}
+  o.sprite = flr(rnd(pickup_sprites_end - pickup_sprites_start + 1)) + pickup_sprites_start
+  o.x, o.y = rand_point_in_circle(circ_orig, circ_orig, circ_r - 8)
+  o.timer = 0
+  o.direction = rnd(1) -- angular direction
+
+  add(pickups, o)
+end
+
 function handle_pickup(obj)
   if collide(obj, p) then
     p.score+=1
@@ -188,10 +151,67 @@ function handle_pickup(obj)
   end
 end
 
+function handle_pickup_movement(o)
+  x = o.x + pickup_speed * cos(o.direction)
+  y = o.y + pickup_speed * sin(o.direction)
+
+  if on_circle(circ_orig, circ_orig, x, y, circ_r - 8) then
+    o.direction = rnd(1)
+  else
+    o.x, o.y = x, y
+  end
+
+  animate_pickup(o)
+end
+
+function animate_pickup(o)
+  o.timer += 1
+
+  if o.timer == 2*bob_wait then o.timer = 0 end
+
+  if (o.timer == 0) then
+    o.y+=1
+  elseif (o.timer == bob_wait) then
+    o.y-=1
+  end
+end
+
+-- enemy functions
+function add_enemy(enemy_type)
+  local enemy = {}
+  if enemy_type == rock then
+    enemy.type = rock
+    enemy.sprite = rock_sprite
+    enemy.x, enemy.y = rand_point_in_circle(circ_orig, circ_orig, circ_r - 8)
+  elseif enemy_type == seal then
+    enemy.type = seal
+    enemy.sprite = seal_sprite_start
+    enemy.h = 1
+    enemy.w = 2
+    enemy.x, enemy.y = ang_to_pl_coord(0.5)
+  end
+
+  add(enemies, enemy)
+end
+
 function handle_enemy(enemy)
   if collide(enemy, p) then
     p.state = dead
     p.sprite = p_dead_sprite
+  end
+end
+
+function handle_enemy_movement(enemy)
+  if enemy.type == rock then
+    return -- rock don't move
+  elseif enemy.type == seal then
+    angle = pl_coord_to_ang(enemy.x + 3, enemy.y + 3)
+    angle+=seal_speed
+
+    if angle > 1 then angle = 0 end
+
+    enemy.x, enemy.y = ang_to_pl_coord(angle)
+    printh(enemy.x .. ', ' .. enemy.y)
   end
 end
 
@@ -230,8 +250,9 @@ function _update()
     foreach(pickups, handle_pickup)
   end
 
-  foreach(enemies, handle_enemy)
   foreach(pickups, handle_pickup_movement)
+  foreach(enemies, handle_enemy)
+  foreach(enemies, handle_enemy_movement)
 
   if #pickups < 1 then
     add_pickup()
