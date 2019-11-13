@@ -24,7 +24,7 @@ down = 3
 btn_z = 4
 btn_x = 5
 
-local moving, aiming, leaping = 0, 1, 2
+local moving, aiming, leaping, dead = 0, 1, 2, 3
 
 p = {}
 p.x = 0
@@ -54,7 +54,9 @@ function _init()
   p.x, p.y = ang_to_pl_coord(0)
 
   pickups = {}
+  enemies = {}
   add_pickup()
+  add_enemy("rock")
 end
 
 function pl_coord_centered()
@@ -107,6 +109,18 @@ function add_pickup()
   o.direction = rnd(1) -- angular direction
 
   add(pickups, o)
+end
+
+function add_enemy(enemy_type)
+  local enemy = {}
+  if enemy_type == "rock" then
+    enemy.sprite = 49 -- rock
+    enemy.x, enemy.y = rand_point_in_circle(circ_orig, circ_orig, circ_r - 8)
+  elseif enemy_type == "seal" then
+    -- TBD
+  end
+
+  add(enemies, enemy)
 end
 
 function handle_pickup_movement(o)
@@ -203,6 +217,12 @@ function handle_pickup(obj)
   end
 end
 
+function handle_enemy(enemy)
+  if collide(enemy, p) then
+    p.state = dead
+  end
+end
+
 function _update()
   if (p.state == moving) then
     handle_player_movement()
@@ -236,6 +256,7 @@ function _update()
     end
 
     foreach(pickups, handle_pickup)
+    foreach(enemies, handle_enemy)
   end
 
   foreach(pickups, handle_pickup_movement)
@@ -256,6 +277,7 @@ function _draw()
 
   -- spr(ice_sprite, 63, 63)
   foreach(pickups, draw_actor)
+  foreach(enemies, draw_actor)
 
   spr(p.sprite,p.x,p.y,1,1,p.flip) 
 
@@ -264,6 +286,9 @@ function _draw()
     aim_y=p.y + 200 * sin(p.aim)
     x, y = pl_coord_centered()
     line(x, y, aim_x, aim_y, 8)
+  elseif p.state == dead then
+    print("you ded", 4, 4, 1)
+    -- TODO: Make a better end game screen
   end
 
   print(p.score, 112, 4, 1)
