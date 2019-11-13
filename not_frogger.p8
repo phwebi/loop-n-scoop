@@ -101,7 +101,7 @@ end
 
 function add_pickup()
   local o = {}
-  o.sprite = flr(rnd(pickup_sprites_end - pickup_sprites_start)) + pickup_sprites_start
+  o.sprite = flr(rnd(pickup_sprites_end - pickup_sprites_start + 1)) + pickup_sprites_start
   o.x, o.y = rand_point_in_circle(circ_orig, circ_orig, circ_r - 8)
   o.timer = 0
   o.direction = rnd(1) -- angular direction
