@@ -228,9 +228,9 @@ function _update()
     end
 
     foreach(pickups, handle_pickup)
-    foreach(enemies, handle_enemy)
   end
 
+  foreach(enemies, handle_enemy)
   foreach(pickups, handle_pickup_movement)
 
   if #pickups < 1 then
@@ -247,7 +247,6 @@ function _draw()
   circfill(circ_orig,circ_orig,circ_r,1)
   circ(circ_orig, circ_orig, circ_r, 6)
 
-  -- spr(ice_sprite, 63, 63)
   foreach(pickups, draw_actor)
   foreach(enemies, draw_actor)
 
