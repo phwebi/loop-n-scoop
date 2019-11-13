@@ -1,6 +1,14 @@
 pico-8 cartridge // http://www.pico-8.com
 version 18
 __lua__
+
+left = 0
+right = 1
+up = 2
+down = 3
+btn_z = 4
+btn_x = 5
+
 -- map
 circ_orig = 63
 circ_r = 55
@@ -17,12 +25,7 @@ p_leap_sprite_start = 32
 p_leap_sprite_end = 33
 leap_speed = 2
 
-left = 0
-right = 1
-up = 2
-down = 3
-btn_z = 4
-btn_x = 5
+p_dead_sprite = 34
 
 local moving, aiming, leaping, dead = 0, 1, 2, 3
 
@@ -220,6 +223,7 @@ end
 function handle_enemy(enemy)
   if collide(enemy, p) then
     p.state = dead
+    p.sprite = p_dead_sprite
   end
 end
 
