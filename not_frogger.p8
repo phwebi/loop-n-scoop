@@ -17,6 +17,13 @@ p_leap_sprite_start = 32
 p_leap_sprite_end = 33
 leap_speed = 2
 
+left = 0
+right = 1
+up = 2
+down = 3
+btn_z = 4
+btn_x = 5
+
 local moving, aiming, leaping = 0, 1, 2
 
 p = {}
@@ -144,13 +151,13 @@ function handle_player_movement()
   updated = false
   angle = pl_coord_to_ang(pl_coord_centered())
 
-  if (btn(0)) then
+  if (btn(left)) then
     angle+=angular_speed
     if angle > 1 then angle = 0 end
     
     p.ccw = true
     updated = true
-  elseif (btn(1)) then
+  elseif (btn(right)) then
     if angle == 0 then angle = 1 end
     angle-=angular_speed
     if angle < 0 then angle = 1 end
@@ -200,11 +207,11 @@ function _update()
   if (p.state == moving) then
     handle_player_movement()
 
-    if btnp(4) then setup_aim() end -- press z to aim
+    if btnp(btn_z) then setup_aim() end -- press z to aim
   elseif (p.state == aiming) then
-    if btnp(5) then -- press x to cancel
+    if btnp(btn_x) then -- press x to cancel
       p.state = moving
-    elseif btnp(4) then -- press z to confirm
+    elseif btnp(btn_z) then -- press z to confirm
       p.state = leaping
       p.sprite = p_leap_sprite_start
     else -- update cursor
