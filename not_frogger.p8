@@ -190,6 +190,7 @@ function add_enemy(enemy_type)
     enemy.sprite_start = seal_sprite_start
     enemy.sprite_end = seal_sprite_end
     enemy.timer = 0
+    enemy.flip = false
     enemy.h = 1
     enemy.w = 2
     enemy.x, enemy.y = ang_to_pl_coord(0.5)
@@ -213,7 +214,7 @@ function handle_enemy_movement(enemy)
     if angle > 1 then angle = 0 end
 
     enemy.x, enemy.y = ang_to_pl_coord(angle)
-    printh(enemy.x .. ', ' .. enemy.y)
+    enemy.flip = enemy.y < circ_orig
   end
 
   animate_enemy(enemy)
@@ -279,7 +280,7 @@ function _update()
 end
 
 function draw_actor(a)
-  spr(a.sprite,a.x,a.y, a.w or 1, a.h or 1) 
+  spr(a.sprite,a.x,a.y, a.w or 1, a.h or 1, a.flip) 
 end
 
 function _draw()
