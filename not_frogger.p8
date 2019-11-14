@@ -133,7 +133,7 @@ end
 function add_pickup()
   local o = {}
   o.sprite = flr(rnd(pickup_sprites_end - pickup_sprites_start + 1)) + pickup_sprites_start
-  o.x, o.y = rand_point_in_circle(circ_orig, circ_orig, circ_r - 8)
+  o.x, o.y = rand_point_in_circle(circ_orig, circ_orig, circ_r - 4)
   o.timer = 0
   o.direction = rnd(1) -- angular direction
 
@@ -151,7 +151,7 @@ function handle_pickup_movement(o)
   x = o.x + pickup_speed * cos(o.direction)
   y = o.y + pickup_speed * sin(o.direction)
 
-  if on_circle(circ_orig, circ_orig, x, y, circ_r - 8) then
+  if on_circle(circ_orig, circ_orig, x, y, circ_r - 3) then
     o.direction = rnd(1)
   else
     o.x, o.y = x, y
