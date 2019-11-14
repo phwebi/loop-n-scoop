@@ -48,13 +48,14 @@ bob_wait = 10
 pickup_speed = 0.2
 
 -- enemies
-local rock, seal = 0, 1
+local rock, seal, shark = 0, 1, 2
 
 rock_sprite = 49
 seal_anim_wait=10
 seal_sprite_start = 32
 seal_sprite_end = 34
 seal_speed = .001
+shark_sprite = 48
 
 function _init()
   -- draw black pixels
@@ -70,6 +71,7 @@ function _init()
   add_pickup()
   add_enemy(rock)
   add_enemy(seal)
+  add_enemy(shark)
 end
 
 -- player functions
@@ -175,12 +177,11 @@ end
 -- enemy functions
 function add_enemy(enemy_type)
   local enemy = {}
-  if enemy_type == rock then
-    enemy.type = rock
+  enemy.type = enemy_type
+  if enemy.type == rock then
     enemy.sprite = rock_sprite
     enemy.x, enemy.y = rand_point_in_circle(circ_orig, circ_orig, circ_r - 8)
-  elseif enemy_type == seal then
-    enemy.type = seal
+  elseif enemy.type == seal then
     enemy.sprite = seal_sprite_start
     enemy.sprite_start = seal_sprite_start
     enemy.sprite_end = seal_sprite_end
@@ -189,6 +190,10 @@ function add_enemy(enemy_type)
     enemy.h = 1
     enemy.w = 2
     enemy.x, enemy.y = ang_to_pl_coord(0.5)
+  elseif enemy.type == shark then
+    enemy.sprite = shark_sprite
+    enemy.flip = false
+    enemy.x, enemy.y = circ_orig, circ_orig
   end
 
   add(enemies, enemy)
@@ -210,6 +215,18 @@ function handle_enemy_movement(enemy)
 
     enemy.x, enemy.y = ang_to_pl_coord(angle)
     enemy.flip = enemy.y < circ_orig
+  elseif enemy.type == shark then
+    x = enemy.x + 0.5
+
+    if enemy.flip then
+      x = enemy.x - 0.5
+    end
+
+    if on_circle(circ_orig, circ_orig, x, enemy.y, circ_r - 3) then
+      enemy.flip = not enemy.flip
+    else
+      enemy.x = x
+    end
   end
 
   animate_enemy(enemy)
