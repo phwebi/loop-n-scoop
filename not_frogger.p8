@@ -15,9 +15,9 @@ circ_r = 55
 
 -- player
 p_radius = 59
+p_anim_wait=2
 p_sprite_start=16
 p_sprite_end=20
-anim_wait=2
 angular_speed = .005
 aim_speed = 0.002
 
@@ -51,9 +51,10 @@ pickup_speed = 0.2
 local rock, seal = 0, 1
 
 rock_sprite = 49
+seal_anim_wait=10
 seal_sprite_start = 32
 seal_sprite_end = 34
-seal_speed = .003
+seal_speed = .001
 
 function _init()
   -- draw black pixels
@@ -88,7 +89,7 @@ end
 function animate_player(sprite_start, sprite_end)
   p.timer+=1
 
-  if p.timer > anim_wait then
+  if p.timer > p_anim_wait then
     p.sprite+=1
     p.timer = 0
   end
@@ -186,6 +187,9 @@ function add_enemy(enemy_type)
   elseif enemy_type == seal then
     enemy.type = seal
     enemy.sprite = seal_sprite_start
+    enemy.sprite_start = seal_sprite_start
+    enemy.sprite_end = seal_sprite_end
+    enemy.timer = 0
     enemy.h = 1
     enemy.w = 2
     enemy.x, enemy.y = ang_to_pl_coord(0.5)
@@ -202,9 +206,7 @@ function handle_enemy(enemy)
 end
 
 function handle_enemy_movement(enemy)
-  if enemy.type == rock then
-    return -- rock don't move
-  elseif enemy.type == seal then
+  if enemy.type == seal then
     angle = pl_coord_to_ang(enemy.x + 3, enemy.y + 3)
     angle+=seal_speed
 
@@ -212,6 +214,23 @@ function handle_enemy_movement(enemy)
 
     enemy.x, enemy.y = ang_to_pl_coord(angle)
     printh(enemy.x .. ', ' .. enemy.y)
+  end
+
+  animate_enemy(enemy)
+end
+
+function animate_enemy(enemy)
+  if enemy.type == seal then
+    enemy.timer+=1
+
+    if enemy.timer > seal_anim_wait then
+      enemy.sprite+=2
+      enemy.timer = 0
+    end
+
+    if enemy.sprite > enemy.sprite_end then
+      enemy.sprite = enemy.sprite_start
+    end
   end
 end
 
