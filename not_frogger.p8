@@ -11,10 +11,10 @@ btn_x = 5
 
 -- map
 circ_orig = 63
-circ_r = 55
+circ_r = 51
 
 -- player
-p_radius = 59
+p_radius = 55
 p_anim_wait=2
 p_sprite_start=16
 p_sprite_end=20
