@@ -217,20 +217,24 @@ function handle_enemy(enemy)
   end
 end
 
+function enemy_speed_mod()
+  return (p.score + 2)/2
+end
+
 function handle_enemy_movement(enemy)
   if enemy.type == seal then
     angle = pl_coord_to_ang(enemy.x, enemy.y)
-    angle+=seal_speed
+    angle+=(seal_speed * enemy_speed_mod())
 
     if angle > 1 then angle = 0 end
 
     enemy.x, enemy.y = ang_to_pl_coord(angle)
     enemy.flip = enemy.y < circ_orig
   elseif enemy.type == shark then
-    x = enemy.x + 0.5
+    x = enemy.x + 0.5 * enemy_speed_mod()
 
     if enemy.flip then
-      x = enemy.x - 0.5
+      x = enemy.x - 0.5 * enemy_speed_mod()
     end
 
     if on_circle(circ_orig, circ_orig, x, enemy.y, circ_r - 7) then
