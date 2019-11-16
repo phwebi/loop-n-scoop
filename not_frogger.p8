@@ -86,6 +86,38 @@ function max_aim_angle() -- 90 deg aim range
   return min_aim_angle() + 0.25
 end
 
+function regulate_aim()
+  if p.aim < 0 then
+    p.aim = p.aim + 1
+  elseif p.aim > 1 then
+    p.aim = p.aim - 1
+  end
+
+  max_a = max_aim_angle()
+  min_a = min_aim_angle()
+
+  if min_a < 0 then min_a = min_a + 1 end
+  if max_a > 1 then max_a = max_a - 1 end
+
+  printh('p.aim: ' .. p.aim)
+  printh('max: ' .. max_a)
+  printh('min: ' .. min_a)
+
+  if max_a > min_a then
+    if p.aim > max_a then
+      p.aim_speed = -abs(p.aim_speed)
+    elseif p.aim < min_a then
+      p.aim_speed = abs(p.aim_speed)
+    end
+  else
+    if p.aim > max_a and p.aim < 0.5 then
+      p.aim_speed = -abs(p.aim_speed)
+    elseif p.aim < min_a and p.aim > 0.5 then
+      p.aim_speed = abs(p.aim_speed)
+    end
+  end
+end
+
 function animate_player(sprite_start, sprite_end)
   p.timer+=1
 
@@ -109,6 +141,10 @@ function handle_player_movement()
     
     p.ccw = true
     updated = true
+
+    p.aim+=angular_speed
+    -- if p.aim > 1 then p.aim = 0 end
+    regulate_aim()
   elseif (btn(right)) then
     if angle == 0 then angle = 1 end
     angle-=angular_speed
@@ -116,6 +152,11 @@ function handle_player_movement()
 
     p.ccw = false
     updated = true
+
+    -- if p.aim == 0 then p.aim = 1 end
+    p.aim-=angular_speed
+    -- if p.aim < 0 then p.aim = 1 end
+    regulate_aim()
   end
 
   if not updated then return end
@@ -264,8 +305,6 @@ end
 
 function _update()
   if (p.state == moving) then
-    handle_player_movement()
-
     if btnp(btn_z) then setup_aim() end -- press z to aim
   elseif (p.state == aiming) then
     if btnp(btn_x) then -- press x to cancel
@@ -275,10 +314,7 @@ function _update()
       p.sprite = p_leap_sprite_start
     else -- update cursor
       p.aim += p.aim_speed
-
-      if (p.aim > max_aim_angle()) or (p.aim < min_aim_angle()) then
-        p.aim_speed = -p.aim_speed
-      end
+      regulate_aim()
     end
   elseif (p.state == leaping) then
     -- update player location
@@ -297,6 +333,8 @@ function _update()
   end
 
   if not (p.state == dead) then
+    handle_player_movement()
+
     foreach(pickups, handle_pickup_movement)
     foreach(enemies, handle_enemy)
     foreach(enemies, handle_enemy_movement)
