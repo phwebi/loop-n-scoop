@@ -41,21 +41,27 @@ p.flip = false
 p.ccw = false
 p.score = 0
 
+-- floating effects
+bob_wait = 10
+float_speed = 0.2
+
 -- pickups
 pickup_sprites_start = 2
 pickup_sprites_end = 8
-bob_wait = 10
-pickup_speed = 0.2
 pickup_sound = 0
 
 -- enemies
 local rock, seal, shark = 0, 1, 2
 
-rock_sprite = 49
+rock_sprite_start = 50
+rock_sprite_end = 51
+rock_speed = 0.2
+
 seal_anim_wait= 10
 seal_sprite_start = 32
 seal_sprite_end = 34
 seal_speed = .001
+
 shark_anim_wait = 3
 shark_sprite_start = 36
 shark_sprite_end = 40
@@ -73,6 +79,7 @@ function _init()
   pickups = {}
   enemies = {}
   add_pickup()
+  add_enemy(rock)
   add_enemy(rock)
   add_enemy(seal)
   add_enemy(shark)
@@ -177,7 +184,7 @@ end
 function add_pickup()
   local o = {}
   o.sprite = flr(rnd(pickup_sprites_end - pickup_sprites_start + 1)) + pickup_sprites_start
-  o.x, o.y = rand_point_in_circle(circ_orig, circ_orig, circ_r - 4)
+  o.x, o.y = rand_point_in_circle(circ_orig, circ_orig, circ_r - 8)
   o.timer = 0
   o.direction = rnd(1) -- angular direction
 
@@ -192,20 +199,20 @@ function handle_pickup(obj)
   end
 end
 
-function handle_pickup_movement(o)
-  x = o.x + pickup_speed * cos(o.direction)
-  y = o.y + pickup_speed * sin(o.direction)
+function handle_float_movement(o)
+  x = o.x + float_speed * cos(o.direction)
+  y = o.y + float_speed * sin(o.direction)
 
-  if on_circle(circ_orig, circ_orig, x, y, circ_r - 3) then
+  if on_circle(circ_orig, circ_orig, x, y, circ_r - 7) then
     o.direction = rnd(1)
   else
     o.x, o.y = x, y
   end
 
-  animate_pickup(o)
+  animate_float(o)
 end
 
-function animate_pickup(o)
+function animate_float(o)
   o.timer += 1
 
   if o.timer == 2*bob_wait then o.timer = 0 end
@@ -222,8 +229,10 @@ function add_enemy(enemy_type)
   local enemy = {}
   enemy.type = enemy_type
   if enemy.type == rock then
-    enemy.sprite = rock_sprite
+    enemy.sprite = flr(rnd(rock_sprite_end - rock_sprite_start + 1)) + rock_sprite_start
     enemy.x, enemy.y = rand_point_in_circle(circ_orig, circ_orig, circ_r - 8)
+    enemy.timer = 0
+    enemy.direction = rnd(1)
   elseif enemy.type == seal then
     enemy.sprite = seal_sprite_start
     enemy.sprite_start = seal_sprite_start
@@ -261,7 +270,9 @@ function enemy_speed_mod()
 end
 
 function handle_enemy_movement(enemy)
-  if enemy.type == seal then
+  if enemy.type == rock then
+    handle_float_movement(enemy)
+  elseif enemy.type == seal then
     angle = pl_coord_to_ang(enemy.x, enemy.y)
     angle+=min(seal_speed * enemy_speed_mod(), 0.008)
 
@@ -287,7 +298,9 @@ function handle_enemy_movement(enemy)
 end
 
 function animate_enemy(enemy)
-  if enemy.type == seal or enemy.type == shark then
+  if enemy.type == rock then
+    animate_float(enemy)
+  elseif enemy.type == seal or enemy.type == shark then
     enemy.timer+=1
 
     if enemy.timer > enemy.anim_wait then
@@ -303,8 +316,10 @@ end
 
 function _update()
   if (p.state == moving) then
+    handle_player_movement()
     if btnp(btn_z) then setup_aim() end -- press z to aim
   elseif (p.state == aiming) then
+    handle_player_movement()
     if btnp(btn_x) then -- press x to cancel
       p.state = moving
     elseif btnp(btn_z) then -- press z to confirm
@@ -331,9 +346,7 @@ function _update()
   end
 
   if not (p.state == dead) then
-    handle_player_movement()
-
-    foreach(pickups, handle_pickup_movement)
+    foreach(pickups, handle_float_movement)
     foreach(enemies, handle_enemy)
     foreach(enemies, handle_enemy_movement)
   end
