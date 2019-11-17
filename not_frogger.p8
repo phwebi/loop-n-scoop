@@ -81,8 +81,7 @@ function _init()
   pickups = {}
   enemies = {}
   add_pickup()
-  add_enemy(rock)
-  add_enemy(rock)
+
   add_enemy(seal)
   add_enemy(shark)
 end
@@ -282,23 +281,19 @@ function handle_enemy(enemy)
   end
 end
 
-function enemy_speed_mod()
-  return (p.score + 2)/2
-end
-
 function handle_enemy_movement(enemy)
   if enemy.type == rock then
     handle_float_movement(enemy)
   elseif enemy.type == seal then
     angle = pl_coord_to_ang(enemy.x, enemy.y)
-    angle+=min(seal_speed * enemy_speed_mod(), 0.008)
+    angle+=seal_speed
 
     if angle > 1 then angle = 0 end
 
     enemy.x, enemy.y = ang_to_pl_coord(angle)
     enemy.flip = enemy.y < circ_orig
   elseif enemy.type == shark then
-    x = enemy.x + min(shark_speed * enemy_speed_mod(), 1)
+    x = enemy.x + shark_speed
 
     if enemy.flip then
       x = enemy.x - shark_speed
