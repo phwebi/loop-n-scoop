@@ -1,6 +1,7 @@
 pico-8 cartridge // http://www.pico-8.com
 version 18
 __lua__
+SPRITE_TRANSPARENT_COLOR = 12
 
 left = 0
 right = 1
@@ -72,7 +73,7 @@ function _init()
   palt(0, false)
  
   -- don't draw light blue pixels
-  palt(12, true)
+  palt(SPRITE_TRANSPARENT_COLOR, true)
 
   p.x, p.y = ang_to_pl_coord(0)
 
@@ -461,7 +462,12 @@ function position_offset(pos)
 end
 
 function collide(o1, o2)
-  return collide_pixel(o1, o2, o2.x - o1.x, o2.y - o1.y)
+  local x1 = o1.x - position_offset(o1.w)
+  local y1 = o1.y - position_offset(o1.h)
+  local x2 = o2.x - position_offset(o2.w)
+  local y2 = o2.y - position_offset(o2.h)
+
+  return collide_pixel(o1, o2, x2 - x1, y2 - y1)
 end	
 
 function collide_pixel(o1,o2,xoff,yoff)
@@ -470,12 +476,17 @@ function collide_pixel(o1,o2,xoff,yoff)
 
   local a = nil
   local b = nil
-  local colcount = 0
+  local collision_count = 0
+
+  local x1_end = ((o1.w or 1) * 8) - 1
+  local y1_end = ((o1.h or 1) * 8) - 1
+  local x2_end = ((o2.w or 1) * 8) - 1
+  local y2_end = ((o2.h or 1) * 8) - 1
   
   local xstart = 0
-  local xend = 7
+  local xend = max(x1_end, x2_end)
   local ystart = 0
-  local yend = 7
+  local yend = max(y1_end, y2_end)
   local x1off = 0
   local x2off = 0
   local y1off = 0
@@ -483,35 +494,38 @@ function collide_pixel(o1,o2,xoff,yoff)
   
   -- narrow range of collision test based on offset of two sprites
   if(xoff > 0) then
-   xend = 7-xoff
-   x1off = xoff
+    xend-=xoff
+    x1off = xoff
   elseif(xoff < 0) then
-   xend = 7+xoff
-   x2off = -xoff
+    xend+=xoff
+    x2off = -xoff
   end
   if(yoff > 0) then
-   yend = 7-yoff
-   y1off = yoff
+    yend-=yoff
+    y1off = yoff
   elseif(yoff < 0) then
-   yend = 7+yoff
-   y2off = -yoff
+    yend+=yoff
+    y2off = -yoff
   end
 
-  for x=xstart,xend do
-   for y=ystart,yend do
-    a = sget(sh1.x+x+x1off,
-     sh1.y+y+y1off)
-    b = sget(sh2.x+x+x2off,
-     sh2.y+y+y2off)
+  for x = xstart, xend do
+    for y = ystart, yend do
+      local x1, y1, x2, y2 = x+x1off, y+y1off, x+x2off, y+y2off
+      local a, b = SPRITE_TRANSPARENT_COLOR, SPRITE_TRANSPARENT_COLOR
 
-    -- transparent color is 12
-    if(a!=12 and b!=12) then
-     colcount += 1
+      if (x1 <= x1_end) and (y2 <= y1_end) then
+        a = sget(sh1.x + x1, sh1.y + y1)
+      end
+
+      if (x2 <= x2_end) and (y2 <= y2_end) then
+        b = sget(sh2.x + x1, sh2.y + y1)
+      end
+
+      if(a != SPRITE_TRANSPARENT_COLOR and b != SPRITE_TRANSPARENT_COLOR) then collision_count += 1 end
     end
-   end
   end
 
-  return colcount > 0
+  return collision_count > 0
  end
 
  -- return object with x,y pixel coords on sprite sheet of given sprite number
