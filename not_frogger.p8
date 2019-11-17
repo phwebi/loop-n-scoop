@@ -59,6 +59,7 @@ seal_speed = .001
 shark_anim_wait = 3
 shark_sprite_start = 36
 shark_sprite_end = 40
+shark_speed = 0.5
 
 function _init()
   -- draw black pixels
@@ -143,7 +144,6 @@ function handle_player_movement()
     updated = true
 
     p.aim+=angular_speed
-    -- if p.aim > 1 then p.aim = 0 end
     regulate_aim()
   elseif (btn(right)) then
     if angle == 0 then angle = 1 end
@@ -153,9 +153,7 @@ function handle_player_movement()
     p.ccw = false
     updated = true
 
-    -- if p.aim == 0 then p.aim = 1 end
     p.aim-=angular_speed
-    -- if p.aim < 0 then p.aim = 1 end
     regulate_aim()
   end
 
@@ -272,10 +270,10 @@ function handle_enemy_movement(enemy)
     enemy.x, enemy.y = ang_to_pl_coord(angle)
     enemy.flip = enemy.y < circ_orig
   elseif enemy.type == shark then
-    x = enemy.x + 0.5 * enemy_speed_mod()
+    x = enemy.x + shark_speed * enemy_speed_mod()
 
     if enemy.flip then
-      x = enemy.x - 0.5 * enemy_speed_mod()
+      x = enemy.x - shark_speed * enemy_speed_mod()
     end
 
     if on_circle(circ_orig, circ_orig, x, enemy.y, circ_r - 7) then
