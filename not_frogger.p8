@@ -360,9 +360,7 @@ function draw_actor(a)
   w = a.w or 1 -- number of 8x8 sprites wide
   h = a.h or 1 -- number of 8x8 sprites wide
 
-  x_offset = (w * 8 / 2) - 1
-  y_offset = (h * 8 / 2) - 1
-  spr(a.sprite, a.x - x_offset, a.y - y_offset, w, h, a.flip) 
+  spr(a.sprite, a.x - position_offset(w), a.y - position_offset(h), w, h, a.flip) 
 end
 
 function draw_aim()
@@ -442,11 +440,20 @@ function pl_coord_to_ang(x, y)
   return atan2(x - circ_orig, y - circ_orig)
 end
 
+function position_offset(pos)
+  return ((pos or 1)*8/2) - 1
+end
+
 function collide(o1, o2)
-  local l = max(o1.x, o2.x)
-  local r = min(o1.x+8,  o2.x+8)
-  local t = max(o1.y,o2.y)
-  local b = min(o1.y+8,  o2.y+8)
+  w1_offset = position_offset(o1.w)
+  h1_offset = position_offset(o1.h)
+  w2_offset = position_offset(o2.w)
+  h2_offset = position_offset(o2.h)
+
+  local l = max(o1.x - w1_offset, o2.x - w2_offset)
+  local r = min(o1.x + w1_offset, o2.x + w2_offset)
+  local t = max(o1.y - h1_offset, o2.y - h2_offset)
+  local b = min(o1.y + h1_offset, o2.y + h2_offset)
 
   -- they overlapped if the area of intersection is greater than 0
   if l < r and t < b then
