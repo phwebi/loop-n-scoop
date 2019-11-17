@@ -102,8 +102,8 @@ function regulate_aim()
     p.aim = p.aim - 1
   end
 
-  max_a = max_aim_angle()
-  min_a = min_aim_angle()
+  local max_a = max_aim_angle()
+  local min_a = min_aim_angle()
 
   if min_a < 0 then min_a = min_a + 1 end
   if max_a > 1 then max_a = max_a - 1 end
@@ -137,8 +137,8 @@ function animate_player(sprite_start, sprite_end)
 end
 
 function handle_player_movement()
-  updated = false
-  angle = pl_coord_to_ang(p.x, p.y)
+  local updated = false
+  local angle = pl_coord_to_ang(p.x, p.y)
 
   if (btn(left)) then
     angle+=angular_speed
@@ -199,8 +199,8 @@ function handle_pickup(obj)
 end
 
 function handle_float_movement(o)
-  x = o.x + float_speed * cos(o.direction)
-  y = o.y + float_speed * sin(o.direction)
+  local x = o.x + float_speed * cos(o.direction)
+  local y = o.y + float_speed * sin(o.direction)
 
   for f in all(floaters) do
     if o != f and collide(o, f) then
@@ -373,8 +373,8 @@ function _update()
 end
 
 function draw_actor(a)
-  w = a.w or 1 -- number of 8x8 sprites wide
-  h = a.h or 1 -- number of 8x8 sprites wide
+  local w = a.w or 1 -- number of 8x8 sprites wide
+  local h = a.h or 1 -- number of 8x8 sprites wide
 
   spr(a.sprite, a.x - position_offset(w), a.y - position_offset(h), w, h, a.flip) 
 end
@@ -427,27 +427,27 @@ function dist_from_origin(x_o, y_o, x, y)
 end
 
 function on_circle(x_o, y_o, x, y, r)
-  d = dist_from_origin(x_o, y_o, x, y)
+  local d = dist_from_origin(x_o, y_o, x, y)
   return abs(d - r) < 1 -- allow for margin of error
 end
 
 function in_circle(x_o, y_o, x, y, r)
-  d = dist_from_origin(x_o, y_o, x, y)
+  local d = dist_from_origin(x_o, y_o, x, y)
   return d < r
 end
 
 function rand_point_in_circle(originx, originy, radius)
-  r = radius * sqrt(rnd(1))
-  theta = rnd(1) * 2 * 3.14159
-  x = originx + r * cos(theta)
-  y = originy + r * sin(theta)
+  local r = radius * sqrt(rnd(1))
+  local theta = rnd(1) * 2 * 3.14159
+  local x = originx + r * cos(theta)
+  local y = originy + r * sin(theta)
 
   return x, y
 end
 
 function ang_to_pl_coord(angle)
-  x_centered=circ_orig + p_radius * cos(angle)
-  y_centered=circ_orig + p_radius * sin(angle)
+  local x_centered=circ_orig + p_radius * cos(angle)
+  local y_centered=circ_orig + p_radius * sin(angle)
 
   return x_centered, y_centered
 end
