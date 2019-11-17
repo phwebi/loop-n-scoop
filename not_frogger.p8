@@ -365,6 +365,28 @@ function draw_actor(a)
   spr(a.sprite, a.x - x_offset, a.y - y_offset, w, h, a.flip) 
 end
 
+function draw_aim()
+  local x = p.x
+  local y = p.y
+  local i = 0
+
+  x+=leap_speed * cos(p.aim)
+  y+=leap_speed * sin(p.aim)
+
+  while in_circle(circ_orig, circ_orig, x, y, p_radius) do
+    -- draw path
+    if i%5 == 0 then
+      circfill(x, y, 1, 12)
+    end
+
+    x+=leap_speed * cos(p.aim)
+    y+=leap_speed * sin(p.aim)
+    i+=1
+  end
+
+  circ(x, y, 4, 12)
+end
+
 function _draw()
   map(0,0,0,0,16,16)
   circfill(circ_orig,circ_orig,circ_r,1)
@@ -375,15 +397,14 @@ function _draw()
   draw_actor(p)
 
   if p.state == aiming then
-    aim_x=p.x + 200 * cos(p.aim)
-    aim_y=p.y + 200 * sin(p.aim)
-    line(p.x, p.y, aim_x, aim_y, 8)
+    draw_aim()
   elseif p.state == dead then
     print("you ded", 4, 4, 1)
     -- TODO: Make a better end game screen
   end
 
-  print(p.score, 112, 4, 1)
+  print(p.score, 112, 4, 6)
+  print(p.score, 112, 3, 13)
 end
 
 -- utils
@@ -394,6 +415,11 @@ end
 function on_circle(x_o, y_o, x, y, r)
   d = dist_from_origin(x_o, y_o, x, y)
   return abs(d - r) < 1 -- allow for margin of error
+end
+
+function in_circle(x_o, y_o, x, y, r)
+  d = dist_from_origin(x_o, y_o, x, y)
+  return d < r
 end
 
 function rand_point_in_circle(originx, originy, radius)
