@@ -108,10 +108,6 @@ function regulate_aim()
   if min_a < 0 then min_a = min_a + 1 end
   if max_a > 1 then max_a = max_a - 1 end
 
-  printh('p.aim: ' .. p.aim)
-  printh('max: ' .. max_a)
-  printh('min: ' .. min_a)
-
   if max_a > min_a then
     if p.aim > max_a then
       p.aim_speed = -abs(p.aim_speed)
@@ -465,23 +461,66 @@ function position_offset(pos)
 end
 
 function collide(o1, o2)
-  w1_offset = position_offset(o1.w)
-  h1_offset = position_offset(o1.h)
-  w2_offset = position_offset(o2.w)
-  h2_offset = position_offset(o2.h)
-
-  local l = max(o1.x - w1_offset, o2.x - w2_offset)
-  local r = min(o1.x + w1_offset, o2.x + w2_offset)
-  local t = max(o1.y - h1_offset, o2.y - h2_offset)
-  local b = min(o1.y + h1_offset, o2.y + h2_offset)
-
-  -- they overlapped if the area of intersection is greater than 0
-  if l < r and t < b then
-    return true
-  end
-					
-	return false
+  return collide_pixel(o1, o2, o2.x - o1.x, o2.y - o1.y)
 end	
+
+function collide_pixel(o1,o2,xoff,yoff)
+  local sh1 = sprite_sheet_coord(o1.sprite)
+  local sh2 = sprite_sheet_coord(o2.sprite)
+
+  local a = nil
+  local b = nil
+  local colcount = 0
+  
+  local xstart = 0
+  local xend = 7
+  local ystart = 0
+  local yend = 7
+  local x1off = 0
+  local x2off = 0
+  local y1off = 0
+  local y2off = 0
+  
+  -- narrow range of collision test based on offset of two sprites
+  if(xoff > 0) then
+   xend = 7-xoff
+   x1off = xoff
+  elseif(xoff < 0) then
+   xend = 7+xoff
+   x2off = -xoff
+  end
+  if(yoff > 0) then
+   yend = 7-yoff
+   y1off = yoff
+  elseif(yoff < 0) then
+   yend = 7+yoff
+   y2off = -yoff
+  end
+
+  for x=xstart,xend do
+   for y=ystart,yend do
+    a = sget(sh1.x+x+x1off,
+     sh1.y+y+y1off)
+    b = sget(sh2.x+x+x2off,
+     sh2.y+y+y2off)
+
+    -- transparent color is 12
+    if(a!=12 and b!=12) then
+     colcount += 1
+    end
+   end
+  end
+
+  return colcount > 0
+ end
+
+ -- return object with x,y pixel coords on sprite sheet of given sprite number
+ function sprite_sheet_coord(sprite)
+  local sh = {}
+  sh.x = (sprite%16)*8
+  sh.y = flr(sprite/16)*8
+  return sh
+ end
 
 __gfx__
 0000000077777777ccceeeccccc999cccccdddccccc444cccccfffccccc333ccccc888cc00000000000000000000000000033000000000000000000000000000
