@@ -76,6 +76,7 @@ function _init()
 
   p.x, p.y = ang_to_pl_coord(0)
 
+  floaters = {}
   pickups = {}
   enemies = {}
   add_pickup()
@@ -189,6 +190,7 @@ function add_pickup()
   o.direction = rnd(1) -- angular direction
 
   add(pickups, o)
+  add(floaters, o)
 end
 
 function handle_pickup(obj)
@@ -196,12 +198,29 @@ function handle_pickup(obj)
     sfx(pickup_sound)
     p.score+=1
     del(pickups, obj)
+    del(floaters, obj)
   end
 end
 
 function handle_float_movement(o)
   x = o.x + float_speed * cos(o.direction)
   y = o.y + float_speed * sin(o.direction)
+
+  for f in all(floaters) do
+    if o != f and collide(o, f) then
+      if o.direction >= 0.5 then
+        o.direction -= (0.5 - o.direction - f.direction)
+      else
+        o.direction += (0.5 - o.direction - f.direction)
+      end
+
+      if f.direction >= 0.5 then
+        o.direction -= (0.5 - o.direction - f.direction)
+      else
+        f.direction += (0.5 - o.direction - f.direction)
+      end
+    end
+  end
 
   if on_circle(circ_orig, circ_orig, x, y, circ_r - 7) then
     o.direction = rnd(1)
@@ -233,6 +252,7 @@ function add_enemy(enemy_type)
     enemy.x, enemy.y = rand_point_in_circle(circ_orig, circ_orig, circ_r - 8)
     enemy.timer = 0
     enemy.direction = rnd(1)
+    add(floaters, enemy)
   elseif enemy.type == seal then
     enemy.sprite = seal_sprite_start
     enemy.sprite_start = seal_sprite_start
