@@ -62,7 +62,32 @@ shark_sprite_start = 36
 shark_sprite_end = 40
 shark_speed = 0.5
 
+-- state swapping 
+state, next_state, change_state = {}, {}, false
+
+function swap_state(s)
+ next_state, change_state = s, true
+end
+
 function _init()
+  swap_state(play_state)
+end
+
+function _update()
+  if (change_state) then
+    state, change_state = next_state, false
+    state.init()
+  end
+
+  state.update()
+end
+
+function _draw()
+  state.draw()
+end
+
+-- play state
+function init_play()
   p = {
     state = moving,
     aim_speed = aim_speed,
@@ -383,7 +408,7 @@ function animate_enemy(enemy)
   end
 end
 
-function _update()
+function update_play()
   if (p.state == moving) then
     handle_player_movement()
     if btnp(btn_z) then setup_aim() end -- press z to aim
@@ -455,7 +480,7 @@ function draw_aim()
   circ(x, y, 4, 12)
 end
 
-function _draw()
+function draw_play()
   map(0,0,0,0,16,16)
   circfill(circ_orig,circ_orig,circ_r,1)
   circ(circ_orig, circ_orig, circ_r, 6)
@@ -478,6 +503,13 @@ function _draw()
   print(p.score .. ' served', 2, 121, 6)
   print(p.score .. ' served', 2, 120, 13)
 end
+
+play_state = {
+ name = "play",
+ init = init_play,
+ update = update_play,
+ draw = draw_play
+}
 
 -- utils
 function dist_from_origin(x_o, y_o, x, y)
