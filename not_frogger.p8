@@ -56,6 +56,8 @@ pickup_sprites_start = 2
 pickup_sprites_end = 8
 pickup_sound = 0
 
+local strawberry, vanilla, blueberry, chocolate = 0, 1, 2, 3
+
 -- enemies
 local rock, seal, shark = 0, 1, 2
 
@@ -82,6 +84,7 @@ function _init()
 
   p.x, p.y = ang_to_pl_coord(0)
 
+  orders = {}
   floaters = {}
   pickups = {}
   enemies = {}
@@ -89,6 +92,8 @@ function _init()
 
   add_enemy(seal)
   add_enemy(shark)
+
+  add_order()
 end
 
 -- player functions
@@ -180,6 +185,32 @@ function setup_aim()
   p.state = aiming
   p.aim = min_aim_angle()
   p.aim_speed = aim_speed
+end
+
+-- orders
+function add_order()
+  local o = {}
+  o.timer = 0
+  o.scoop1 = flr(rnd(4)) -- 0 through 3
+  o.scoop2 = flr(rnd(4))
+
+  add(orders, o)
+end
+
+function handle_order(o)
+end
+
+function draw_order(o)
+  local x, y = 2, 105
+  rectfill(x+1, y+1, x+13, y+20, 1)
+  rectfill(x, y, x + 12, y + 19, 12)
+
+  spr(scoop_sprite(o.scoop1), x + 2, y + 2)
+  spr(scoop_sprite(o.scoop2), x + 2, y + 11)
+end
+
+function scoop_sprite(scoop)
+  return pickup_sprites_start + scoop
 end
 
 -- pickup functions
@@ -419,6 +450,8 @@ function _draw()
   end
 
   spr(truck_sprite, 89, 106, truck_w, truck_h)
+
+  foreach(orders, draw_order)
 
   print(p.score, 112, 4, 6)
   print(p.score, 112, 3, 13)
