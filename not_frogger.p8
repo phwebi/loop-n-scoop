@@ -56,17 +56,11 @@ pickup_sprites_start = 2
 pickup_sprites_end = 8
 pickup_sound = 0
 
-local strawberry, vanilla, blueberry, chocolate = 0, 1, 2, 3
-
 scoop_waiting_sprite = 9
 scoop_done_sprite = 10
 
 -- enemies
-local rock, seal, shark = 0, 1, 2
-
-rock_sprite_start = 48
-rock_sprite_end = 51
-rock_speed = 0.2
+local seal, shark = 0, 1, 2
 
 seal_anim_wait= 10
 seal_sprite_start = 32
@@ -91,8 +85,7 @@ function _init()
   floaters = {}
   pickups = {}
   enemies = {}
-  -- add_enemy(rock)
-  -- add_enemy(rock)
+
   add_enemy(seal)
   add_enemy(shark)
 
@@ -310,13 +303,7 @@ end
 function add_enemy(enemy_type)
   local enemy = {}
   enemy.type = enemy_type
-  if enemy.type == rock then
-    enemy.sprite = flr(rnd(rock_sprite_end - rock_sprite_start + 1)) + rock_sprite_start
-    enemy.x, enemy.y = rand_point_in_circle(circ_orig, circ_orig, circ_r - 8)
-    enemy.timer = 0
-    enemy.direction = rnd(1)
-    add(floaters, enemy)
-  elseif enemy.type == seal then
+  if enemy.type == seal then
     enemy.sprite = seal_sprite_start
     enemy.sprite_start = seal_sprite_start
     enemy.sprite_end = seal_sprite_end
@@ -353,9 +340,7 @@ function enemy_speed_mod()
 end
 
 function handle_enemy_movement(enemy)
-  if enemy.type == rock then
-    handle_float_movement(enemy)
-  elseif enemy.type == seal then
+  if enemy.type == seal then
     angle = pl_coord_to_ang(enemy.x, enemy.y)
     angle+=min(seal_speed * enemy_speed_mod(), 0.008)
 
@@ -381,9 +366,7 @@ function handle_enemy_movement(enemy)
 end
 
 function animate_enemy(enemy)
-  if enemy.type == rock then
-    animate_float(enemy)
-  elseif enemy.type == seal or enemy.type == shark then
+  if enemy.type == seal or enemy.type == shark then
     enemy.timer+=1
 
     if enemy.timer > enemy.anim_wait then
