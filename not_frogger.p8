@@ -91,7 +91,6 @@ function _init()
   floaters = {}
   pickups = {}
   enemies = {}
-  add_pickup()
   -- add_enemy(rock)
   -- add_enemy(rock)
   add_enemy(seal)
@@ -201,6 +200,8 @@ function add_order()
   o.scoop2_done = false
 
   add(orders, o)
+  add_pickup(o.scoop1)
+  add_pickup(o.scoop2)
 end
 
 function handle_order(o)
@@ -234,9 +235,9 @@ function scoop_sprite(scoop)
 end
 
 -- pickup functions
-function add_pickup()
+function add_pickup(flavor)
   local o = {}
-  o.flavor = flr(rnd(4))
+  o.flavor = flavor or flr(rnd(4))
   o.sprite = pickup_sprites_start + o.flavor
   o.x, o.y = rand_point_in_circle(circ_orig, circ_orig, circ_r - 8)
   o.timer = 0
@@ -434,7 +435,7 @@ function _update()
     foreach(orders, handle_order)
   end
 
-  if #pickups < 1 then
+  if #pickups < 5 then
     add_pickup()
   end
 end
@@ -488,8 +489,8 @@ function _draw()
 
   foreach(orders, draw_order)
 
-  print(p.score, 112, 4, 6)
-  print(p.score, 112, 3, 13)
+  print(p.score .. ' served', 2, 121, 6)
+  print(p.score .. ' served', 2, 120, 13)
 end
 
 -- utils
