@@ -62,6 +62,24 @@ shark_sprite_start = 36
 shark_sprite_end = 40
 shark_speed = 0.5
 
+function bp()
+ if (btnp(❎)) return true
+ if (btnp(🅾️)) return true
+end
+
+function printo(str,x,y,c1,c2)
+ for i=-1,1 do
+  for j=-1,1 do
+--   print(str,x+1,y,c2)
+--   print(str,x,y+1,c2)
+--   print(str,x-1,y,c2)
+--   print(str,x,y-1,c2)
+ print(str,x+i,y+j,c2)
+  end
+ end
+ print(str,x,y,c1)
+end
+
 -- state swapping 
 state, next_state, change_state = {}, {}, false
 
@@ -70,7 +88,9 @@ function swap_state(s)
 end
 
 function _init()
-  swap_state(play_state)
+  cartdata("boba_penguins")
+  best=dget(0)
+  swap_state(title_state)
 end
 
 function _update()
@@ -85,6 +105,64 @@ end
 function _draw()
   state.draw()
 end
+
+-- title state
+first=true
+function init_title()
+  wipe=0
+  t=-10
+end
+
+function update_title()
+  t+=1
+ 
+  if (bp() and wipe==0) then
+    wipe=1
+    sfx(61)
+    music(4)
+  end
+ 
+  if (wipe>0) then
+    wipe+=1
+    if (wipe>16) swap_state(play_state)
+  end
+end
+
+function draw_title()
+  cls(7)
+  map(0,0,0,0,16,16)
+
+  if (t>0) then
+    local c=t%16>4 and 13 or 14
+    print("🅾️ to start ",min(42,t-90),90,c)
+  end 
+  
+  -- best
+  local str="best: "..best
+  printo(str,128-#str*4-1,min(2,-50+t),7,13)
+  
+  -- exit wipe
+  if (wipe>0) then
+    for y=0,128,4 do
+      circfill(circ_orig, circ_orig, wipe*3, 1)
+    end
+  end
+  
+  -- entry wipe
+  if (t<32)then
+    rectfill(0,0+(t+10)*8,
+    128,128,13)
+    rectfill(0,10+(t+10)*8,
+    128,128,first and 7 or 10)
+  end
+end
+
+title_state = {
+  name = "title",
+  init = init_title,
+  update = update_title,
+  draw = draw_title
+}
 
 -- play state
 function init_play()
