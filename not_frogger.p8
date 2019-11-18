@@ -58,6 +58,9 @@ pickup_sound = 0
 
 local strawberry, vanilla, blueberry, chocolate = 0, 1, 2, 3
 
+scoop_waiting_sprite = 9
+scoop_done_sprite = 10
+
 -- enemies
 local rock, seal, shark = 0, 1, 2
 
@@ -194,17 +197,36 @@ function add_order()
   o.timer = 0
   o.scoop1 = flr(rnd(4)) -- 0 through 3
   o.scoop2 = flr(rnd(4))
+  o.scoop1_done = false
+  o.scoop2_done = false
 
   add(orders, o)
 end
 
 function handle_order(o)
+  if o.scoop1_done and o.scoop2_done then
+    p.score += 1
+    del(orders, o)
+    add_order()
+  end
 end
 
 function draw_order(o)
   -- draw in truck
   spr(scoop_sprite(o.scoop2), 116, 112)
   spr(scoop_sprite(o.scoop1), 110, 112)
+
+  if o.scoop1_done then
+    spr(scoop_done_sprite, 112, 100)
+  else
+    spr(scoop_waiting_sprite, 112, 100)
+  end
+
+  if o.scoop2_done then
+    spr(scoop_done_sprite, 119, 100)
+  else
+    spr(scoop_waiting_sprite, 119, 100)
+  end
 end
 
 function scoop_sprite(scoop)
@@ -214,7 +236,8 @@ end
 -- pickup functions
 function add_pickup()
   local o = {}
-  o.sprite = flr(rnd(pickup_sprites_end - pickup_sprites_start + 1)) + pickup_sprites_start
+  o.flavor = flr(rnd(4))
+  o.sprite = pickup_sprites_start + o.flavor
   o.x, o.y = rand_point_in_circle(circ_orig, circ_orig, circ_r - 8)
   o.timer = 0
   o.direction = rnd(1) -- angular direction
@@ -226,7 +249,16 @@ end
 function handle_pickup(obj)
   if collide(obj, p) then
     sfx(pickup_sound)
-    p.score+=1
+    -- p.score+=1
+    local order = orders[1]
+    if (not order.scoop1_done) and obj.flavor == order.scoop1 then
+      order.scoop1_done = true
+    elseif (not order.scoop2_done) and obj.flavor == order.scoop2 then
+      order.scoop2_done = true
+    else
+      p.state = dead
+    end
+
     del(pickups, obj)
     del(floaters, obj)
   end
@@ -399,6 +431,7 @@ function _update()
     foreach(pickups, handle_float_movement)
     foreach(enemies, handle_enemy)
     foreach(enemies, handle_enemy_movement)
+    foreach(orders, handle_order)
   end
 
   if #pickups < 1 then
@@ -574,14 +607,14 @@ function collide_pixel(o1,o2,xoff,yoff)
  end
 
 __gfx__
-0000000077777777ccceeeccccc999cccccdddccccc444cccccfffccccc333ccccc888cc00000000000000000000000000000000000000000000000000000000
-0000000077777767cceef7eccc99a79cccdd67dccc44f74cccffa7fccc33b73ccc88e78c00000000000000000000000000000000000000000000000000000000
-0070070077777777ceeeef7ec9999a79cdddd67dc4444f74cffffa7fc3333b73c8888e7800000000000000000000000000000000000000000000000000000000
-0007700077777777c2eeeefec49999a9c2dddd6dc24444f4c4ffffafc03333b3c28888e800000000000000000000000000000000000000000000000000000000
-0007700076777777c22eeeeec4499999c22dddddc2244444c44fffffc0033333c228888800000000000000000000000000000000000000000000000000000000
-0070070077777777cc222eeccc44499ccc222ddccc22244ccc444ffccc00033ccc22288c00000000000000000000000000000000000000000000000000000000
-0000000077776777c222eeeec4449999c222ddddc2224444c444ffffc0003333c222888800000000000000000000000000000000000000000000000000000000
-0000000077777777cccccccccccccccccccccccccccccccccccccccccccccccccccccccc00000000000000000000000000000000000000000000000000000000
+0000000077777777ccceeeccccc999cccccdddccccc444cccccfffccccc333ccccc888ccc99cccccc33ccccc0000000000000000000000000000000000000000
+0000000077777767cceef7eccc99a79cccdd67dccc44f74cccffa7fccc33b73ccc88e78c9a79cccc3b73cccc0000000000000000000000000000000000000000
+0070070077777777ceeeef7ec9999a79cdddd67dc4444f74cffffa7fc3333b73c8888e789aa9cccc3bb3cccc0000000000000000000000000000000000000000
+0007700077777777c2eeeefec49999a9c2dddd6dc24444f4c4ffffafc03333b3c28888e8c99cccccc33ccccc0000000000000000000000000000000000000000
+0007700076777777c22eeeeec4499999c22dddddc2244444c44fffffc0033333c2288888cccccccccccccccc0000000000000000000000000000000000000000
+0070070077777777cc222eeccc44499ccc222ddccc22244ccc444ffccc00033ccc22288ccccccccccccccccc0000000000000000000000000000000000000000
+0000000077776777c222eeeec4449999c222ddddc2224444c444ffffc0003333c2228888cccccccccccccccc0000000000000000000000000000000000000000
+0000000077777777cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc0000000000000000000000000000000000000000
 cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc0000000000000000000000000000000000000000000000000000000000000000
 ccdd55ccccdd55ccccdd55ccccdd55ccccdd55ccccdd55ccccdd55cccc50555c0000000000000000000000000000000000000000000000000000000000000000
 cdddd55ccdddd55ccdddd55ccdddd55ccdddd55ccdddd55ccdddd55cc550774c0000000000000000000000000000000000000000000000000000000000000000
