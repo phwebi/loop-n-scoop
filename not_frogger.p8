@@ -1,8 +1,10 @@
 pico-8 cartridge // http://www.pico-8.com
 version 18
 __lua__
+---------- constants -------------------
 SPRITE_TRANSPARENT_COLOR = 12
 
+-- buttons
 left = 0
 right = 1
 up = 2
@@ -35,18 +37,6 @@ p_dead_sprite = 23
 
 local moving, aiming, leaping, dead = 0, 1, 2, 3
 
-p = {}
-p.x = 0
-p.y = 0
-p.state = moving
-p.aim_speed = aim_speed
-p.aim = 0
-p.sprite = p_sprite_start
-p.timer = 0
-p.flip = false
-p.ccw = false
-p.score = 0
-
 -- floating effects
 bob_wait = 10
 float_speed = 0.2
@@ -73,13 +63,23 @@ shark_sprite_end = 40
 shark_speed = 0.5
 
 function _init()
+  p = {
+    state = moving,
+    aim_speed = aim_speed,
+    aim = 0,
+    sprite = p_sprite_start,
+    timer = 0,
+    flip = false,
+    ccw = false,
+    score = 0,
+  }
+  p.x, p.y = ang_to_pl_coord(0)
+
   -- draw black pixels
   palt(0, false)
  
   -- don't draw light blue pixels
   palt(SPRITE_TRANSPARENT_COLOR, true)
-
-  p.x, p.y = ang_to_pl_coord(0)
 
   orders = {}
   floaters = {}
@@ -185,12 +185,13 @@ end
 
 -- orders
 function add_order()
-  local o = {}
-  o.timer = 0
-  o.scoop1 = flr(rnd(4)) -- 0 through 3
-  o.scoop2 = flr(rnd(4))
-  o.scoop1_done = false
-  o.scoop2_done = false
+  local o = {
+    timer = 0,
+    scoop1 = flr(rnd(4)), -- 0 through 3
+    scoop2 = flr(rnd(4)),
+    scoop1_done = false,
+    scoop2_done = false,
+  }
 
   add(orders, o)
   add_pickup(o.scoop1)
@@ -229,12 +230,13 @@ end
 
 -- pickup functions
 function add_pickup(flavor)
-  local o = {}
-  o.flavor = flavor or flr(rnd(4))
+  local o = {
+    flavor = flavor or flr(rnd(4)),
+    timer = 0,
+    direction = rnd(1), -- angular direction
+  }
   o.sprite = pickup_sprites_start + o.flavor
   o.x, o.y = rand_point_in_circle(circ_orig, circ_orig, circ_r - 8)
-  o.timer = 0
-  o.direction = rnd(1) -- angular direction
 
   add(pickups, o)
   add(floaters, o)
@@ -301,8 +303,9 @@ end
 
 -- enemy functions
 function add_enemy(enemy_type)
-  local enemy = {}
-  enemy.type = enemy_type
+  local enemy = {
+    type = enemy_type,
+  }
   if enemy.type == seal then
     enemy.sprite = seal_sprite_start
     enemy.sprite_start = seal_sprite_start
