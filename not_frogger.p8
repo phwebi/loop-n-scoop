@@ -148,7 +148,7 @@ function draw_title()
     print('loop & scoop', 40, 48, 13)
 
     if (t>0) then
-      local c=t%16>4 and 13 or 14
+      local c=t%16>4 and 13 or 8
       print("🅾️ to start ",min(42,(t*3.4)-90),90,c)
     end 
 
