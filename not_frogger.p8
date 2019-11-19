@@ -630,10 +630,8 @@ function draw_end()
   circ(circ_orig, circ_orig, circ_r, 6)
 
   if (wipe > 0 and wipe<=32)then
-    rectfill(0,0+(wipe)*4,
-    128,128,13)
-    rectfill(0,10+(wipe)*4,
-    128,128,first and 7 or 10)
+    rectfill(0,0+(wipe)*4,128,128,8)
+    rectfill(0,10+(wipe)*4,128,128,7)
   else
     draw_play()
 
