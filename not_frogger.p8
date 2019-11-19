@@ -147,13 +147,14 @@ function draw_title()
       circfill(16*(i+1)-8-1,y,8,c)
     end
 
-    local x = t%20 < 10 and 56 or 55
+    local y = t%20 < 10 and 56 or 55
     for i=0, 15 do
       pal(i, 6)
     end
-    spr(128, 4, x+1, 16, 2)
+    spr(128, 4, y+1, 16, 2)
     pal()
-    spr(128, 3, x, 16, 2)
+    spr(128, 3, y, 16, 2)
+    print("penguin pete's", 5, y-8, 2)
 
     if (t>0) then
       local c=t%16>4 and 13 or 8
