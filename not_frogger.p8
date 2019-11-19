@@ -497,6 +497,10 @@ function update_play()
   if (p.state == moving) then
     handle_player_movement()
     if btnp(btn_z) then setup_aim() end -- press z to aim
+
+    if #pickups < 5 then
+      add_pickup()
+    end
   elseif (p.state == aiming) then
     handle_player_movement()
     if btnp(btn_x) then -- press x to cancel
@@ -529,10 +533,6 @@ function update_play()
     foreach(enemies, handle_enemy)
     foreach(enemies, handle_enemy_movement)
     foreach(orders, handle_order)
-  end
-
-  if #pickups < 5 then
-    add_pickup()
   end
 
   if p.score > best then
