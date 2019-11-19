@@ -130,6 +130,8 @@ function draw_title()
   cls(7)
   map(0,0,0,0,16,16)
 
+  print('loop & scoop', 40, min(48, 5*t), 13)
+
   if (t>0) then
     local c=t%16>4 and 13 or 14
     print("🅾️ to start ",min(42,(t*3.4)-90),90,c)
