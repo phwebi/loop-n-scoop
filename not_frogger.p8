@@ -110,7 +110,7 @@ end
 first=true
 function init_title()
   wipe=0
-  t=-10
+  t=0
 end
 
 function update_title()
@@ -118,8 +118,6 @@ function update_title()
  
   if (bp() and wipe==0) then
     wipe=1
-    sfx(61)
-    music(4)
   end
  
   if (wipe>0) then
@@ -134,7 +132,7 @@ function draw_title()
 
   if (t>0) then
     local c=t%16>4 and 13 or 14
-    print("🅾️ to start ",min(42,t-90),90,c)
+    print("🅾️ to start ",min(42,(t*3.4)-90),90,c)
   end 
   
   -- best
@@ -146,14 +144,6 @@ function draw_title()
     for y=0,128,4 do
       circfill(circ_orig, circ_orig, wipe*3, 1)
     end
-  end
-  
-  -- entry wipe
-  if (t<32)then
-    rectfill(0,0+(t+10)*8,
-    128,128,13)
-    rectfill(0,10+(t+10)*8,
-    128,128,first and 7 or 10)
   end
 end
 
@@ -531,6 +521,8 @@ function update_play()
 
     if p.state == dead then dset(0,p.score) end
   end
+
+  if p.state == dead then swap_state(end_state) end
 end
 
 function draw_actor(a)
@@ -611,6 +603,53 @@ play_state = {
  init = init_play,
  update = update_play,
  draw = draw_play
+}
+
+-- end state
+function init_end()
+  t = 0
+  wipe = 0
+end
+
+function update_end()
+  t+=1
+ 
+  if (bp() and wipe==0) then
+    wipe=1
+  end
+ 
+  if (wipe>0) then
+    wipe+=1
+    if (wipe>=32) swap_state(play_state)
+  end
+end
+
+function draw_end()
+  map(0,0,0,0,16,16)
+  circfill(circ_orig,circ_orig,circ_r,1)
+  circ(circ_orig, circ_orig, circ_r, 6)
+
+  if (wipe > 0 and wipe<=32)then
+    rectfill(0,0+(wipe)*4,
+    128,128,13)
+    rectfill(0,10+(wipe)*4,
+    128,128,first and 7 or 10)
+  else
+    draw_play()
+
+    if (t>0) then
+      local c=t%16>4 and 7 or 12
+      print("🅾️ to restart ",min(38,(t*3.4)-90),90,c)
+    end 
+  end
+end
+
+
+end_state = {
+ name = "end",
+ init = init_end,
+ update = update_end,
+ draw = draw_end,
 }
 
 -- utils
