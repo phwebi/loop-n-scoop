@@ -499,6 +499,7 @@ function update_play()
     handle_player_movement()
     if btnp(btn_z) then setup_aim() end -- press z to aim
 
+    foreach(orders, handle_order)
     if #pickups < 5 then
       add_pickup()
     end
@@ -533,7 +534,6 @@ function update_play()
     foreach(pickups, handle_float_movement)
     foreach(enemies, handle_enemy)
     foreach(enemies, handle_enemy_movement)
-    foreach(orders, handle_order)
   end
 
   if p.score > best then
