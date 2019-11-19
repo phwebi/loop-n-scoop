@@ -129,23 +129,32 @@ end
 function draw_title()
   cls(7)
   map(0,0,0,0,16,16)
-
-  print('loop & scoop', 40, min(48, 5*t), 13)
-
-  if (t>0) then
-    local c=t%16>4 and 13 or 14
-    print("🅾️ to start ",min(42,(t*3.4)-90),90,c)
-  end 
-  
-  -- best
-  local str="best: "..best
-  printo(str,3,max(120,160-t),7,13)
   
   -- exit wipe
   if (wipe>0) then
     for y=0,128,4 do
       circfill(circ_orig, circ_orig, wipe*3, 1)
     end
+  else
+    for i = 0, 7 do
+      local y = min(24, t)
+      local c = (i%2 == 0) and 15 or 8
+      local x_end = ((i+1)*16) - 1
+      local x_start = x_end - 16
+      rectfill(x_start,0,x_end,y,c)
+      circfill(16*(i+1)-8-1,y,8,c)
+    end
+
+    print('loop & scoop', 40, 48, 13)
+
+    if (t>0) then
+      local c=t%16>4 and 13 or 14
+      print("🅾️ to start ",min(42,(t*3.4)-90),90,c)
+    end 
+
+    -- best
+    local str="best: "..best
+    printo(str,3,max(120,160-t),7,13)
   end
 end
 
@@ -801,9 +810,9 @@ c777766ccc77766cccc7776ccc7776cc666667777776665566666777777666556666677777766655
 7777777677777776c777777677677776cccc8888cccc765566cccc8888cccc556667cccc8888cccc000000000000000000000000000bb000ccccccccc11111cc
 ccccccccc2222222222222222222222222222cccc0000ccccc00ccccc0000cccc0000ccccccc00cc00000cccc0000ccc000000ccc0000cccc0000ccc00000000
 ccccccccc2777777772777777777777777772ccc000000ccc000cccc000000cc000000cc00cc00cc00000ccc00000ccc000000cc000000cc000000cc00000000
-ccccccccc2777777772778887788778877882ccc00cc00cccc00cccc00cc00cc00cc00cc00cc00cc00cccccc00cccccccccc00cc00cc00cc00cc00cc00000000
-ccccccccc2777777772777788778877887788ccc00cc00cccc00ccccccc000ccccc00ccc000000cc00000ccc00000ccccc0000ccc0000ccc000000cc00000000
-ccccceeeeeee8888882777788778877887788ccc00cc00cccc00cccccc000cccccc00ccc000000cc000000cc000000cccc0000ccc0000cccc00000cc00000000
+ccccccccc277777777277888ff88ff88ff882ccc00cc00cccc00cccc00cc00cc00cc00cc00cc00cc00cccccc00cccccccccc00cc00cc00cc00cc00cc00000000
+ccccccccc2777777772776688ff88ff88ff88ccc00cc00cccc00ccccccc000ccccc00ccc000000cc00000ccc00000ccccc0000ccc0000ccc000000cc00000000
+ccccceeeeeee8888882777688ff88ff88ff88ccc00cc00cccc00cccccc000cccccc00ccc000000cc000000cc000000cccc0000ccc0000cccc00000cc00000000
 ccccc1d7dddd1d7df82771111111111111112ccc00cc00cccc00ccccc000cccc00cc00cccccc00cccccc00cc00cc00cccccc00cc00cc00cccccc00cc00000000
 cccc1d7dddd1dd7df82771111111111111112ccc000000ccc0000ccc000000cc000000cccccc00cc000000cc000000cccccc00cc000000ccc00000cc00000000
 cccc1d7dddd1dd7df82771111111111111112cccc0000cccc0000ccc000000ccc0000ccccccc00cc00000cccc0000ccccccc00ccc0000cccc0000ccc00000000
