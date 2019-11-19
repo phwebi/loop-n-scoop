@@ -591,9 +591,6 @@ function draw_play()
 
   if p.state == aiming then
     draw_aim()
-  elseif p.state == dead then
-    print("you ded", 4, 4, 1)
-    -- TODO: Make a better end game screen
   end
 
   spr(truck_sprite, 89, 106, truck_w, truck_h)
@@ -651,13 +648,18 @@ function draw_end()
 
   if (wipe > 0 and wipe<=32)then
     rectfill(0,0+(wipe)*4,128,128,8)
-    rectfill(0,10+(wipe)*4,128,128,9)
+    rectfill(0,10+(wipe)*4,128,128,15)
   else
     draw_play()
 
     if (t>0) then
       local c=t%16>4 and 7 or 12
       print("🅾️ to restart ",min(38,(t*3.4)-90),90,c)
+
+      local y = min(40, t-42)
+      rectfill(0,y, 128, y+42, 8)
+      rectfill(0,y+4, 128, y+38, 15)
+      printo("game over", 45, y+20, 7, 8)
     end 
   end
 end
