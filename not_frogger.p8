@@ -650,7 +650,7 @@ function draw_end()
 
   if (wipe > 0 and wipe<=32)then
     rectfill(0,0+(wipe)*4,128,128,8)
-    rectfill(0,10+(wipe)*4,128,128,7)
+    rectfill(0,10+(wipe)*4,128,128,9)
   else
     draw_play()
 
