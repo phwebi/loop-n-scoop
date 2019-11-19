@@ -158,7 +158,7 @@ function draw_title()
 
     if (t>0) then
       local c=t%16>4 and 13 or 8
-      print("🅾️ to start ",min(42,(t*3.4)-90),90,c)
+      print("❎ to start ",min(42,(t*3.4)-90),90,c)
     end 
 
     -- best
@@ -654,7 +654,7 @@ function draw_end()
 
     if (t>0) then
       local c=t%16>4 and 7 or 12
-      print("🅾️ to restart ",min(38,(t*3.4)-90),90,c)
+      print("❎ to restart ",min(38,(t*3.4)-90),90,c)
 
       local y = min(40, t-42)
       rectfill(0,y, 128, y+42, 8)
