@@ -198,9 +198,18 @@ title_state = {
 
 -- help state
 function init_help()
+  goal, controls = 0, 1
+  page = goal
 end
 
 function update_help()
+  if bp() then swap_state(title_state) end
+
+  if btnp(left) then
+    page = max(0, page-1)
+  elseif btnp(right) then
+    page = min(1, page+1)
+  end
 end
 
 function draw_help()
@@ -213,15 +222,29 @@ function draw_help()
   rectfill(0,0,127,127,8)
   rectfill(2,2,125,125,15)
 
-  printo("goal",10,10,7,8)
-  print("RUN YOUR ICE CREAM SHOP AND",9,20,8)
-  print("AVOID ARCTIC PREDATORS.",9,28,8)
+  if page == goal then
+    printo("goal",10,10,7,8)
+    print("RUN YOUR ICE CREAM SHOP AND",9,20,8)
+    print("AVOID ARCTIC PREDATORS.",9,28,8)
 
-  spr(truck_sprite, 41, 40, truck_w, truck_h)
-  spr(scoop_sprite(1), 68, 46)
-  spr(scoop_sprite(2), 62, 46)
-  print("COLLECT ONLY FLAVORS NEEDED",9,70,8)
-  print("FOR YOUR NEXT ORDER - OR DIE.",9,80,8)
+    spr(truck_sprite, 41, 40, truck_w, truck_h)
+    spr(scoop_sprite(1), 68, 46)
+    spr(scoop_sprite(2), 62, 46)
+    print("COLLECT ONLY FLAVORS NEEDED",9,70,8)
+    print("FOR YOUR NEXT ORDER - OR DIE.",9,80,8)
+  elseif page == controls then
+    printo("controls",10,10,7,8)
+    print("⬅️➡️ to move",9, 20, 8)
+    print("🅾️   to aim",9, 30, 8)
+
+    print("WHILE AIMING",9,50,2)
+    print("🅾️   to select aim",9, 60, 8)
+    print("❎   to cancel",9, 70, 8)
+  end
+
+  print("❎ close",9, 116, 13)
+  print("⬅️",105, 116, page == 0 and 6 or 13)
+  print("➡️",113,116, page == 1 and 6 or 13)
 end
 
 help_state = {
