@@ -108,7 +108,7 @@ end
 
 -- title state
 first=true
-local start, instructions = 0, 1
+local start, help = 0, 1
 function init_title()
   wipe=0
   t=0
@@ -132,7 +132,7 @@ function update_title()
     wipe+=1
     if (wipe>16) then
       if selected == start then swap_state(play_state) end
-      if selected == instructions then swap_state(help_state) end
+      if selected == help then swap_state(help_state) end
     end
   end
 end
@@ -147,9 +147,9 @@ function draw_title()
       for y=0,128,4 do
         circfill(circ_orig, circ_orig, wipe*3, 1)
       end
-    elseif selected == instructions then
-      rectfill(0,0+(wipe)*8,128,128,8)
-      rectfill(0,10+(wipe)*8,128,128,15)
+    elseif selected == help then
+      rectfill(0,0,127,10+(wipe)*8,8)
+      rectfill(2,2,125,wipe*8,15)
     end
   else
     for i = 0, 7 do
@@ -175,15 +175,17 @@ function draw_title()
     if (t>0) then
       local c=t%16>4 and 13 or 8
       local start_color = (selected == start) and c or 13
-      local instr_color = (selected == instructions) and c or 13
+      local help_color = (selected == help) and c or 13
       print("start", min(55,(t*3.4)-90),86,start_color)
-      print("instructions", min(42,(t*3.4)-90),96,instr_color)
+      print("help", min(55,(t*3.4)-90),96,help_color)
+
+      local selected_y = (selected == start) and 86 or 96
+      print("❎",min(46,(t*3.4)-99), selected_y, c)
     end 
 
     -- best
     local str="best: "..best
     printo(str,4,max(119,160-t),7,13)
-    print("❎",118, 120, 13)
   end
 end
 
@@ -202,12 +204,28 @@ function update_help()
 end
 
 function draw_help()
-  cls(7)
-  map(0,0,0,0,16,16)
+  -- draw black pixels
+  palt(0, false)
+ 
+  -- don't draw light blue pixels
+  palt(SPRITE_TRANSPARENT_COLOR, true)
+
+  rectfill(0,0,127,127,8)
+  rectfill(2,2,125,125,15)
+
+  printo("goal",10,10,7,8)
+  print("RUN YOUR ICE CREAM SHOP AND",9,20,8)
+  print("AVOID ARCTIC PREDATORS.",9,28,8)
+
+  spr(truck_sprite, 41, 40, truck_w, truck_h)
+  spr(scoop_sprite(1), 68, 46)
+  spr(scoop_sprite(2), 62, 46)
+  print("COLLECT ONLY FLAVORS NEEDED",9,70,8)
+  print("FOR YOUR NEXT ORDER - OR DIE.",9,80,8)
 end
 
 help_state = {
-  name = "instructions",
+  name = "help",
   init = init_help,
   update = update_help,
   draw = draw_help,
