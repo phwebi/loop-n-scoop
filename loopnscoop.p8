@@ -43,11 +43,11 @@ local moving, aiming, leaping, dead = 0, 1, 2, 3
 -- floating effects
 bob_wait = 10
 
--- pickups
-pickup_sprites_start = 2
-pickup_sprites_end = 8
+-- scoops
+scoop_sprites_start = 2
+scoop_sprites_end = 8
 wildcard_scoop = 4
-pickup_sound = 0
+scoop_sound = 0
 
 scoop_waiting_sprite = 9
 scoop_done_sprite = 10
@@ -279,7 +279,7 @@ function init_play()
 
   orders = {}
   floaters = {}
-  pickups = {}
+  scoops = {}
   enemies = {}
 
   add_enemy(seal)
@@ -390,8 +390,8 @@ function add_order()
   }
 
   add(orders, o)
-  add_pickup(o.scoop1)
-  add_pickup(o.scoop2)
+  add_scoop(o.scoop1)
+  add_scoop(o.scoop2)
 end
 
 function handle_order(o)
@@ -400,7 +400,7 @@ function handle_order(o)
     del(orders, o)
 
     if o.scoop1_done == o.scoop2_done then
-      add_pickup(wildcard_scoop)
+      add_scoop(wildcard_scoop)
     end
   end
 end
@@ -426,27 +426,27 @@ function draw_order(o)
 end
 
 function scoop_sprite(scoop)
-  return pickup_sprites_start + scoop
+  return scoop_sprites_start + scoop
 end
 
--- pickup functions
-function add_pickup(flavor)
+-- scoop functions
+function add_scoop(flavor)
   local o = {
     flavor = flavor or flr(rnd(4)),
     timer = 0,
     vx = rnd(0.6) - 0.3,
     vy = rnd(0.6) - 0.3,
   }
-  o.sprite = pickup_sprites_start + o.flavor
+  o.sprite = scoop_sprites_start + o.flavor
   o.x, o.y = rand_point_in_circle(circ_orig, circ_orig, circ_r - 8)
 
-  add(pickups, o)
+  add(scoops, o)
   add(floaters, o)
 end
 
-function handle_pickup(obj)
+function handle_scoop(obj)
   if collide(obj, p) then
-    sfx(pickup_sound)
+    sfx(scoop_sound)
     if #orders > 0 then
       local order = orders[1]
       if (order.scoop1_done == 0) and (obj.flavor == wildcard_scoop or obj.flavor == order.scoop1) then
@@ -458,7 +458,7 @@ function handle_pickup(obj)
       end
     end
 
-    del(pickups, obj)
+    del(scoops, obj)
     del(floaters, obj)
   end
 end
@@ -611,8 +611,8 @@ function update_play()
     if btnp(btn_z) then setup_aim() end -- press z to aim
 
     if #orders < 1 then add_order() end
-    if #pickups < min(3 + flr(p.score/2), max_scoops) then
-      add_pickup()
+    if #scoops < min(3 + flr(p.score/2), max_scoops) then
+      add_scoop()
     end
   elseif (p.state == aiming) then
     handle_player_movement()
@@ -639,11 +639,11 @@ function update_play()
       animate_player(p_leap_sprite_start, p_leap_sprite_end)
     end
 
-    foreach(pickups, handle_pickup)
+    foreach(scoops, handle_scoop)
   end
 
   if not (p.state == dead) then
-    foreach(pickups, handle_float_movement)
+    foreach(scoops, handle_float_movement)
     foreach(enemies, handle_enemy)
     foreach(enemies, handle_enemy_movement)
     foreach(orders, handle_order)
@@ -698,7 +698,7 @@ function draw_play()
   circfill(circ_orig,circ_orig,circ_r,1)
   circ(circ_orig, circ_orig, circ_r, 6)
 
-  foreach(pickups, draw_actor)
+  foreach(scoops, draw_actor)
   foreach(enemies, draw_actor)
   draw_actor(p)
 
