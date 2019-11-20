@@ -108,13 +108,21 @@ end
 
 -- title state
 first=true
+local start, instructions = 0, 1
 function init_title()
   wipe=0
   t=0
+  selected = start
 end
 
 function update_title()
   t+=1
+
+  if btnp(up) then
+    selected = max(0, selected-1)
+  elseif btnp(down) then
+    selected = min(1, selected+1)
+  end
  
   if (bp() and wipe==0) then
     wipe=1
@@ -122,7 +130,10 @@ function update_title()
  
   if (wipe>0) then
     wipe+=1
-    if (wipe>16) swap_state(play_state)
+    if (wipe>16) then
+      if selected == start then swap_state(play_state) end
+      if selected == instructions then swap_state(help_state) end
+    end
   end
 end
 
@@ -132,8 +143,13 @@ function draw_title()
   
   -- exit wipe
   if (wipe>0) then
-    for y=0,128,4 do
-      circfill(circ_orig, circ_orig, wipe*3, 1)
+    if selected == start then
+      for y=0,128,4 do
+        circfill(circ_orig, circ_orig, wipe*3, 1)
+      end
+    elseif selected == instructions then
+      rectfill(0,0+(wipe)*8,128,128,8)
+      rectfill(0,10+(wipe)*8,128,128,15)
     end
   else
     for i = 0, 7 do
@@ -158,12 +174,16 @@ function draw_title()
 
     if (t>0) then
       local c=t%16>4 and 13 or 8
-      print("❎ to start ",min(42,(t*3.4)-90),90,c)
+      local start_color = (selected == start) and c or 13
+      local instr_color = (selected == instructions) and c or 13
+      print("start", min(55,(t*3.4)-90),86,start_color)
+      print("instructions", min(42,(t*3.4)-90),96,instr_color)
     end 
 
     -- best
     local str="best: "..best
-    printo(str,3,max(120,160-t),7,13)
+    printo(str,4,max(119,160-t),7,13)
+    print("❎",118, 120, 13)
   end
 end
 
@@ -172,6 +192,25 @@ title_state = {
   init = init_title,
   update = update_title,
   draw = draw_title
+}
+
+-- help state
+function init_help()
+end
+
+function update_help()
+end
+
+function draw_help()
+  cls(7)
+  map(0,0,0,0,16,16)
+end
+
+help_state = {
+  name = "instructions",
+  init = init_help,
+  update = update_help,
+  draw = draw_help,
 }
 
 -- play state
@@ -671,7 +710,7 @@ function draw_end()
 
     if (t>0) then
       local c=t%16>4 and 7 or 12
-      print("❎ to restart ",min(38,(t*3.4)-90),90,c)
+      print("❎ restart ",min(38,(t*3.4)-90),90,c)
 
       local y = min(40, t-42)
       rectfill(0,y, 128, y+42, 8)
