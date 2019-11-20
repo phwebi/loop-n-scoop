@@ -392,7 +392,6 @@ function handle_order(o)
   if o.scoop1_done and o.scoop2_done then
     p.score += 1
     del(orders, o)
-    add_order()
   end
 end
 
@@ -597,7 +596,7 @@ function update_play()
     handle_player_movement()
     if btnp(btn_z) then setup_aim() end -- press z to aim
 
-    foreach(orders, handle_order)
+    if #orders < 1 then add_order() end
     if #pickups < min(3 + flr(p.score/2), max_scoops) then
       add_pickup()
     end
@@ -632,7 +631,6 @@ function update_play()
     foreach(pickups, handle_float_movement)
     foreach(enemies, handle_enemy)
     foreach(enemies, handle_enemy_movement)
-  else
     foreach(orders, handle_order)
   end
 
