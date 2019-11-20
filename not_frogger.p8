@@ -435,13 +435,15 @@ end
 function handle_pickup(obj)
   if collide(obj, p) then
     sfx(pickup_sound)
-    local order = orders[1]
-    if (not order.scoop1_done) and obj.flavor == order.scoop1 then
-      order.scoop1_done = true
-    elseif (not order.scoop2_done) and obj.flavor == order.scoop2 then
-      order.scoop2_done = true
-    else
-      p.state = dead
+    if #orders > 0 then
+      local order = orders[1]
+      if (not order.scoop1_done) and obj.flavor == order.scoop1 then
+        order.scoop1_done = true
+      elseif (not order.scoop2_done) and obj.flavor == order.scoop2 then
+        order.scoop2_done = true
+      else
+        p.state = dead
+      end
     end
 
     del(pickups, obj)
