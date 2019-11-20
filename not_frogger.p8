@@ -64,21 +64,17 @@ shark_sprite_end = 40
 shark_speed = 0.5
 
 function bp()
- if (btnp(❎)) return true
- if (btnp(🅾️)) return true
+  if (btnp(❎)) return true
+  if (btnp(🅾️)) return true
 end
 
 function printo(str,x,y,c1,c2)
- for i=-1,1 do
-  for j=-1,1 do
---   print(str,x+1,y,c2)
---   print(str,x,y+1,c2)
---   print(str,x-1,y,c2)
---   print(str,x,y-1,c2)
- print(str,x+i,y+j,c2)
+  for i=-1,1 do
+    for j=-1,1 do
+      print(str,x+i,y+j,c2)
+    end
   end
- end
- print(str,x,y,c1)
+  print(str,x,y,c1)
 end
 
 -- state swapping 
@@ -615,10 +611,10 @@ function draw_play()
 end
 
 play_state = {
- name = "play",
- init = init_play,
- update = update_play,
- draw = draw_play
+  name = "play",
+  init = init_play,
+  update = update_play,
+  draw = draw_play
 }
 
 -- end state
@@ -665,10 +661,10 @@ end
 
 
 end_state = {
- name = "end",
- init = init_end,
- update = update_end,
- draw = draw_end,
+  name = "end",
+  init = init_end,
+  update = update_end,
+  draw = draw_end,
 }
 
 -- utils
@@ -775,15 +771,15 @@ function collide_pixel(o1,o2,xoff,yoff)
   end
 
   return collision_count > 0
- end
+end
 
- -- return object with x,y pixel coords on sprite sheet of given sprite number
- function sprite_sheet_coord(sprite)
+-- return object with x,y pixel coords on sprite sheet of given sprite number
+function sprite_sheet_coord(sprite)
   local sh = {}
   sh.x = (sprite%16)*8
   sh.y = flr(sprite/16)*8
   return sh
- end
+end
 
 __gfx__
 0000000077777777ccceeeccccc999cccccdddccccc444cccccfffccccc333ccccc888ccc99cccccc33ccccc0000000000000000000000000000000000000000
