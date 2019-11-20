@@ -1,7 +1,9 @@
 pico-8 cartridge // http://www.pico-8.com
 version 18
 __lua__
--- Penguin Pete's Loop N Scoop
+-- penguin pete's loop n scoop
+--
+--
 ---------- constants -------------------
 SPRITE_TRANSPARENT_COLOR = 12
 
@@ -49,8 +51,10 @@ pickup_sound = 0
 scoop_waiting_sprite = 9
 scoop_done_sprite = 10
 
+max_scoops = 8
+
 -- enemies
-local seal, shark = 0, 1, 2
+local seal, shark = 0, 1
 
 seal_anim_wait= 10
 seal_sprite_start = 32
@@ -514,7 +518,7 @@ function update_play()
     if btnp(btn_z) then setup_aim() end -- press z to aim
 
     foreach(orders, handle_order)
-    if #pickups < min(3 + flr(p.score/2), 8) then
+    if #pickups < min(3 + flr(p.score/2), max_scoops) then
       add_pickup()
     end
   elseif (p.state == aiming) then
