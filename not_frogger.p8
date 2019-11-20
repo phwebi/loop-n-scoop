@@ -89,7 +89,7 @@ function swap_state(s)
 end
 
 function _init()
-  cartdata("boba_penguins")
+  cartdata("loop_n_scoop")
   best=dget(0)
   swap_state(title_state)
 end
