@@ -2,3 +2,5 @@ log.txt
 config.txt
 sdl_controllers.txt
 cdata/
+bbs/
+*.ds_store
