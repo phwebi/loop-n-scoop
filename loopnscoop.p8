@@ -46,6 +46,7 @@ bob_wait = 10
 -- pickups
 pickup_sprites_start = 2
 pickup_sprites_end = 8
+wildcard_scoop = 4
 pickup_sound = 0
 
 scoop_waiting_sprite = 9
@@ -268,6 +269,7 @@ function init_play()
     flip = false,
     ccw = false,
     score = 0,
+    leaps = 0,
   }
   p.x, p.y = ang_to_pl_coord(0)
 
@@ -379,8 +381,8 @@ function add_order()
     timer = 0,
     scoop1 = flr(rnd(4)), -- 0 through 3
     scoop2 = flr(rnd(4)),
-    scoop1_done = false,
-    scoop2_done = false,
+    scoop1_done = 0,
+    scoop2_done = 0,
   }
 
   add(orders, o)
@@ -389,9 +391,13 @@ function add_order()
 end
 
 function handle_order(o)
-  if o.scoop1_done and o.scoop2_done then
+  if o.scoop1_done > 0 and o.scoop2_done > 0 then
     p.score += 1
     del(orders, o)
+
+    if o.scoop1_done == o.scoop2_done then
+      add_pickup(wildcard_scoop)
+    end
   end
 end
 
@@ -401,12 +407,14 @@ function draw_order(o)
   spr(scoop_sprite(o.scoop1), 110, 112)
 
   if o.scoop1_done then
-    spr(scoop_done_sprite, 112, 100)
-  else
-    spr(scoop_waiting_sprite, 112, 100)
+    if o.scoop1_done > 0 then
+      spr(scoop_done_sprite, 112, 100)
+    else
+      spr(scoop_waiting_sprite, 112, 100)
+    end
   end
 
-  if o.scoop2_done then
+  if o.scoop2_done > 0 then
     spr(scoop_done_sprite, 119, 100)
   else
     spr(scoop_waiting_sprite, 119, 100)
@@ -437,10 +445,10 @@ function handle_pickup(obj)
     sfx(pickup_sound)
     if #orders > 0 then
       local order = orders[1]
-      if (not order.scoop1_done) and obj.flavor == order.scoop1 then
-        order.scoop1_done = true
-      elseif (not order.scoop2_done) and obj.flavor == order.scoop2 then
-        order.scoop2_done = true
+      if (order.scoop1_done == 0) and (obj.flavor == wildcard_scoop or obj.flavor == order.scoop1) then
+        order.scoop1_done = p.leaps
+      elseif (order.scoop2_done == 0) and (obj.flavor == wildcard_scoop or obj.flavor == order.scoop2) then
+        order.scoop2_done = p.leaps
       else
         p.state = dead
       end
@@ -609,6 +617,7 @@ function update_play()
     elseif btnp(btn_z) then -- press z to confirm
       p.state = leaping
       p.sprite = p_leap_sprite_start
+      p.leaps+=1
     else -- update cursor
       p.aim += p.aim_speed
       regulate_aim()
@@ -888,9 +897,9 @@ __gfx__
 0000000077777767cceef7eccc99a79cccdd67dccc44f74cccdde79ccc33b73ccc88e78c9a79cccc3b73cccc0000000000000000000000000000000000000000
 0070070077777777ceeeef7ec9999a79cdddd67dc4444f74cdd88a73c3333b73c8888e789aa9cccc3bb3cccc0000000000000000000000000000000000000000
 0007700077777777c2eeeefec49999a9c2dddd6dc24444f4c28899b3c03333b3c28888e8c99cccccc33ccccc0000000000000000000000000000000000000000
-0007700076777777c22eeeeec4499999c22dddddc2244444c2299331c0033333c2288888cccccccccccccccc0000000000000000000000000000000000000000
-0070070077777777cc222eeccc44499ccc222ddccc22244ccc44031ccc00033ccc22288ccccccccccccccccc0000000000000000000000000000000000000000
-0000000077776777c222eeeec4449999c222ddddc2224444c2201111c0003333c2228888cccccccccccccccc0000000000000000000000000000000000000000
+0007700076777777c22eeeeec4499999c22dddddc2244444c2299333c0033333c2288888cccccccccccccccc0000000000000000000000000000000000000000
+0070070077777777cc222eeccc44499ccc222ddccc22244ccc44033ccc00033ccc22288ccccccccccccccccc0000000000000000000000000000000000000000
+0000000077776777c222eeeec4449999c222ddddc2224444c2203333c0003333c2228888cccccccccccccccc0000000000000000000000000000000000000000
 0000000077777777cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc0000000000000000000000000000000000000000
 cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc0000000000000000000000000000000000000000000000000000000000000000
 ccdd55ccccdd55ccccdd55ccccdd55ccccdd55ccccdd55ccccdd55cccc50555c0000000000000000000000000000000000000000000000000000000000000000
