@@ -514,7 +514,7 @@ function update_play()
     if btnp(btn_z) then setup_aim() end -- press z to aim
 
     foreach(orders, handle_order)
-    if #pickups < 5 then --min(2 + flr(p.score/2), 8) then
+    if #pickups < min(3 + flr(p.score/2), 8) then
       add_pickup()
     end
   elseif (p.state == aiming) then
