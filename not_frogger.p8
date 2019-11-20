@@ -1,6 +1,7 @@
 pico-8 cartridge // http://www.pico-8.com
 version 18
 __lua__
+-- Penguin Pete's Loop N Scoop
 ---------- constants -------------------
 SPRITE_TRANSPARENT_COLOR = 12
 
@@ -355,7 +356,6 @@ end
 function handle_pickup(obj)
   if collide(obj, p) then
     sfx(pickup_sound)
-    -- p.score+=1
     local order = orders[1]
     if (not order.scoop1_done) and obj.flavor == order.scoop1 then
       order.scoop1_done = true
@@ -534,6 +534,8 @@ function update_play()
     foreach(pickups, handle_float_movement)
     foreach(enemies, handle_enemy)
     foreach(enemies, handle_enemy_movement)
+  else
+    foreach(orders, handle_order)
   end
 
   if p.score > best then
@@ -596,9 +598,6 @@ function draw_play()
   spr(truck_sprite, 89, 106, truck_w, truck_h)
 
   foreach(orders, draw_order)
-
-  -- print(p.score .. ' served', 2, 121, 6)
-  -- print(p.score .. ' served', 2, 120, 13)
 
   print("score",2,111,2)
   local d1=flr(p.score/100)
