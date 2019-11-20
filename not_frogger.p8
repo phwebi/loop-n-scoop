@@ -40,7 +40,6 @@ local moving, aiming, leaping, dead = 0, 1, 2, 3
 
 -- floating effects
 bob_wait = 10
-float_speed = 0.2
 
 -- pickups
 pickup_sprites_start = 2
@@ -340,7 +339,8 @@ function add_pickup(flavor)
   local o = {
     flavor = flavor or flr(rnd(4)),
     timer = 0,
-    direction = rnd(1), -- angular direction
+    vx = rnd(0.6) - 0.3,
+    vy = rnd(0.6) - 0.3,
   }
   o.sprite = pickup_sprites_start + o.flavor
   o.x, o.y = rand_point_in_circle(circ_orig, circ_orig, circ_r - 8)
@@ -366,30 +366,48 @@ function handle_pickup(obj)
   end
 end
 
+function dotpart(vx,vy,nx,ny)
+  local dot = vx*nx+vy*ny
+  vx = vx - dot*nx
+  vy = vy - dot*ny
+  return vx,vy
+end
+
 function handle_float_movement(o)
-  local x = o.x + float_speed * cos(o.direction)
-  local y = o.y + float_speed * sin(o.direction)
+  o.x += o.vx
+  o.y += o.vy
 
-  for f in all(floaters) do
-    if o != f and collide(o, f) then
-      if o.direction >= 0.5 then
-        o.direction -= (0.5 - o.direction - f.direction)
-      else
-        o.direction += (0.5 - o.direction - f.direction)
-      end
-
-      if f.direction >= 0.5 then
-        o.direction -= (0.5 - o.direction - f.direction)
-      else
-        f.direction += (0.5 - o.direction - f.direction)
-      end
-    end
+  if (not in_circle(circ_orig, circ_orig, o.x, o.y, circ_r - 7)) then
+    o.vx = -o.vx
+    o.x += o.vx
+    o.vy = -o.vy
+    o.y += o.vy
   end
 
-  if on_circle(circ_orig, circ_orig, x, y, circ_r - 7) then
-    o.direction = rnd(1)
-  else
-    o.x, o.y = x, y
+  for f in all(floaters) do
+    local dx = o.x-f.x
+    local dy = o.y-f.y
+    local sqrdist = dx*dx+dy*dy
+
+    if sqrdist < 64 and sqrdist > 0 then
+      local dist = sqrt(sqrdist)
+      local nx = dy/dist
+      local ny = -dx/dist
+
+      local dd1x,dd1y=dotpart(o.vx,o.vy,nx,ny)
+      local dd2x,dd2y=dotpart(f.vx,f.vy,nx,ny)
+
+      local push = max(0,9-dist)*0.5/dist
+      o.x += dx*push
+      o.y += dy*push
+      f.x -= dx*push
+      f.y -= dy*push
+
+      o.vx = o.vx - dd1x + dd2x
+      o.vy = o.vy - dd1y + dd2y
+      f.vx = f.vx - dd2x + dd1x
+      f.vy = f.vy - dd2y + dd1y
+    end
   end
 
   animate_float(o)
