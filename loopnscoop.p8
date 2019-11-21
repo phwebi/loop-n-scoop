@@ -207,7 +207,7 @@ title_state = {
 
 -- help state
 function init_help()
-  goal, controls = 0, 1
+  goal, powerups, controls = 0, 1, 2
   page = goal
 end
 
@@ -217,7 +217,7 @@ function update_help()
   if btnp(left) then
     page = max(0, page-1)
   elseif btnp(right) then
-    page = min(1, page+1)
+    page = min(2, page+1)
   end
 end
 
@@ -245,6 +245,18 @@ function draw_help()
     spr(scoop_sprite(wildcard_scoop),68,94)
     print("BY GETTING",80,95,8)
     print("AN ORDER IN 1 MOVE.",9, 105,8)
+  elseif page == powerups then
+    printo("powerups",10,10,7,8)
+    print("A POWERUP SPAWNS FOR EVERY 5",9,20,8)
+    print("ORDERS COMPLETED.",9,28,8)
+
+    spr(present_sprites_start + shield,9,50)
+    print("shield",20,50,8)
+    print("ACTIVE ON ENEMY COLLISION",20,60,8)
+
+    spr(present_sprites_start + slow_time,9,80)
+    print("slow time",20,80,8)
+    print("THINGS MOVE 75% SLOWER",20,90,8)
   elseif page == controls then
     printo("controls",10,10,7,8)
     print("⬅️➡️ to move",9, 20, 8)
@@ -256,8 +268,8 @@ function draw_help()
   end
 
   print("❎ close",9, 116, 13)
-  print("⬅️",105, 116, page == 0 and 6 or 13)
-  print("➡️",113,116, page == 1 and 6 or 13)
+  print("⬅️",105, 116, page == goal and 6 or 13)
+  print("➡️",113,116, page == controls and 6 or 13)
 end
 
 help_state = {
