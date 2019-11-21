@@ -2,7 +2,7 @@ pico-8 cartridge // http://www.pico-8.com
 version 18
 __lua__
 -- penguin pete's loop n scoop
--- v0.2.0
+-- v0.3.0
 --
 ---------- constants -------------------
 SPRITE_TRANSPARENT_COLOR = 12
