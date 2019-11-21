@@ -54,6 +54,12 @@ scoop_done_sprite = 10
 
 max_scoops = 8
 
+-- presents
+local shield, slow_time = 0, 1
+present_box_sprite = 24
+present_sprites_start = 25
+present_sprites_end = 26
+
 -- enemies
 local seal, shark = 0, 1
 
@@ -274,6 +280,8 @@ function init_play()
     ccw = false,
     score = 0,
     leaps = 0,
+    powerup = -1,
+    power_active = -1,
   }
   p.x, p.y = ang_to_pl_coord(0)
 
@@ -281,11 +289,13 @@ function init_play()
   floaters = {}
   scoops = {}
   enemies = {}
+  presents = {}
 
   add_enemy(seal)
   add_enemy(shark)
 
   add_order()
+  add_present()
 end
 
 -- player functions
@@ -379,6 +389,31 @@ function setup_aim()
   p.aim_speed = aim_speed
 end
 
+-- presents
+function add_present()
+  local a = rnd(1)
+  local x, y = ang_to_pl_coord(a)
+  local power = {
+    type = flr(rnd(2)),
+    x = x,
+    y = y,
+    sprite = present_box_sprite,
+  }
+
+  add(presents, power)
+end
+
+function handle_present(present)
+  if collide(present, p) then
+    del(presents, present)
+    p.powerup = present.type
+
+    if p.powerup == slow_time then
+      p.power_active = 300
+    end
+  end
+end
+
 -- orders
 function add_order()
   local o = {
@@ -401,6 +436,10 @@ function handle_order(o)
 
     if o.scoop1_done == o.scoop2_done then
       add_scoop(wildcard_scoop)
+    end
+
+    if score%5 == 0 then
+      add_present()
     end
   end
 end
@@ -554,12 +593,23 @@ end
 
 function handle_enemy(enemy)
   if collide(enemy, p) then
-    p.state = dead
-    p.sprite = p_dead_sprite
+    if p.powerup == shield then
+      if p.power_active == -1 then
+        p.power_active = 60
+      else
+        return
+      end
+    else
+      p.state = dead
+      p.sprite = p_dead_sprite
+    end
   end
 end
 
 function enemy_speed_mod()
+  if p.powerup == slow_time then
+    return 0.25
+  end
   return (p.score + 2)/2
 end
 
@@ -576,7 +626,7 @@ function handle_enemy_movement(enemy)
     x = enemy.x + min(shark_speed * enemy_speed_mod(), 1)
 
     if enemy.flip then
-      x = enemy.x - shark_speed
+      x = enemy.x - min(shark_speed * enemy_speed_mod(), 1)
     end
 
     if on_circle(circ_orig, circ_orig, x, enemy.y, circ_r - 7) then
@@ -606,6 +656,14 @@ end
 
 function update_play()
   t+=1
+
+  if p.powerup > -1 and p.power_active > 0 then
+    p.power_active-=1
+  elseif p.powerup > -1 and p.power_active == 0 then
+    p.powerup = -1
+    p.power_active = -1
+  end
+
   if (p.state == moving) then
     handle_player_movement()
     if btnp(btn_z) then setup_aim() end -- press z to aim
@@ -647,6 +705,7 @@ function update_play()
     foreach(enemies, handle_enemy)
     foreach(enemies, handle_enemy_movement)
     foreach(orders, handle_order)
+    foreach(presents, handle_present)
   end
 
   if p.score > best then
@@ -698,9 +757,15 @@ function draw_play()
   circfill(circ_orig,circ_orig,circ_r,1)
   circ(circ_orig, circ_orig, circ_r, 6)
 
+
+  foreach(presents, draw_actor)
   foreach(scoops, draw_actor)
   foreach(enemies, draw_actor)
+
   draw_actor(p)
+  if p.powerup == shield and p.power_active > 0 then
+    circ(p.x, p.y, 5, 9)
+  end
 
   if p.state == aiming then
     draw_aim()
@@ -722,6 +787,13 @@ function draw_play()
   spr(69+d1,2,117)
   spr(69+d2,2+8,117)
   spr(69+d3,2+16,117)
+
+  if p.power_active < 0 then
+    pal(9, 13)
+    pal(10, 6)
+  end
+  if p.powerup >=0 then spr(present_sprites_start + p.powerup, 4, 4) end
+
   pal()
 end
 
@@ -905,13 +977,13 @@ __gfx__
 0070070077777777cc222eeccc44499ccc222ddccc22244ccc44033ccc00033ccc22288ccccccccccccccccc0000000000000000000000000000000000000000
 0000000077776777c222eeeec4449999c222ddddc2224444c2203333c0003333c2228888cccccccccccccccc0000000000000000000000000000000000000000
 0000000077777777cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc0000000000000000000000000000000000000000
-cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc33c33cc99999cc999aaacc0000000000000000000000000000000000000000
-ccdd55ccccdd55ccccdd55ccccdd55ccccdd55ccccdd55ccccdd55cccc50555cceeebe7c9aaaa79c9aa77acc0000000000000000000000000000000000000000
-cdddd55ccdddd55ccdddd55ccdddd55ccdddd55ccdddd55ccdddd55cc550774cc28838ec9aa9aa9c9aa77acc0000000000000000000000000000000000000000
-cdd0705ccdd0705ccdd0705ccdd0705ccdd0705ccdd0705ccdd0705cc5d7974cc28838ec9aa9aa9c9aa77acc0000000000000000000000000000000000000000
-cde7972ccde7972ccde7972ccde7972ccde7972ccde7972cdde79725cdd0777cc03333bc9aaa9a9c9aa77acc0000000000000000000000000000000000000000
-cdd7775ccdd77744cdd77744c997775ccd99775cddd77755cdd7775ccdd0dd9cc28838ec9aaaaa9cc9a7accc0000000000000000000000000000000000000000
-cd997744cd99775cc997775ccdd77744cdd77744cd99744ccd99744cccdddd9cc22202ecc99999cccc9acccc0000000000000000000000000000000000000000
+cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc33c33c999aaaccc99999cc0000000000000000000000000000000000000000
+ccdd55ccccdd55ccccdd55ccccdd55ccccdd55ccccdd55ccccdd55cccc50555cceeebe7c9aa77acc9aaaa79c0000000000000000000000000000000000000000
+cdddd55ccdddd55ccdddd55ccdddd55ccdddd55ccdddd55ccdddd55cc550774cc28838ec9aa77acc9aa9aa9c0000000000000000000000000000000000000000
+cdd0705ccdd0705ccdd0705ccdd0705ccdd0705ccdd0705ccdd0705cc5d7974cc28838ec9aa77acc9aa9aa9c0000000000000000000000000000000000000000
+cde7972ccde7972ccde7972ccde7972ccde7972ccde7972cdde79725cdd0777cc03333bc9aa77acc9aaa9a9c0000000000000000000000000000000000000000
+cdd7775ccdd77744cdd77744c997775ccd99775cddd77755cdd7775ccdd0dd9cc28838ecc9a7accc9aaaaa9c0000000000000000000000000000000000000000
+cd997744cd99775cc997775ccdd77744cdd77744cd99744ccd99744cccdddd9cc22202eccc9accccc99999cc0000000000000000000000000000000000000000
 c666666cc666666cc666666cc666666cc666666ccccccccccccccccccccccccccccccccccccccccccccccccc0000000000000000000000000000000000000000
 ccccccc5d5555cccccccccc5d5555ccccccccccccccccccccccccccccccccccccccccccccccccccc000000000000000000000000000000000000000000000000
 ccccc555555555ccccccc555555555cccccccc5555cccccccccccc5555cccccccccccc5555cccccc000000000000000000000000000000000000000000000000
