@@ -56,6 +56,8 @@ max_scoops = 8
 
 -- presents
 local shield, slow_time = 0, 1
+slow_time_mod = 0.25
+
 present_box_sprite = 24
 present_sprites_start = 25
 present_sprites_end = 26
@@ -295,7 +297,6 @@ function init_play()
   add_enemy(shark)
 
   add_order()
-  add_present()
 end
 
 -- player functions
@@ -409,7 +410,7 @@ function handle_present(present)
     p.powerup = present.type
 
     if p.powerup == slow_time then
-      p.power_active = 300
+      p.power_active = 600
     end
   end
 end
@@ -438,7 +439,7 @@ function handle_order(o)
       add_scoop(wildcard_scoop)
     end
 
-    if score%5 == 0 then
+    if p.score%5 == 0 then
       add_present()
     end
   end
@@ -510,13 +511,19 @@ function dotpart(vx,vy,nx,ny)
 end
 
 function handle_float_movement(o)
-  o.x += o.vx
-  o.y += o.vy
+  local ovx = p.powerup != slow_time and o.vx or o.vx * slow_time_mod
+  local ovy = p.powerup != slow_time and o.vy or o.vy * slow_time_mod
+  o.x += ovx
+  o.y += ovy
 
   if (not in_circle(circ_orig, circ_orig, o.x, o.y, circ_r - 7)) then
     o.vx = -o.vx
-    o.x += o.vx
     o.vy = -o.vy
+
+    ovx = p.powerup != slow_time and o.vx or o.vx * slow_time_mod
+    ovy = p.powerup != slow_time and o.vy or o.vy * slow_time_mod
+
+    o.x += o.vx
     o.y += o.vy
   end
 
@@ -608,7 +615,7 @@ end
 
 function enemy_speed_mod()
   if p.powerup == slow_time then
-    return 0.25
+    return slow_time_mod
   end
   return (p.score + 2)/2
 end
