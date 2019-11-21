@@ -465,6 +465,7 @@ function handle_order_scoring(o)
 end
 
 function draw_order(o)
+  if o.scored then return end
   -- draw in truck
   spr(scoop_sprite(o.scoop2), 116, 112)
   spr(scoop_sprite(o.scoop1), 110, 112)
@@ -512,7 +513,7 @@ function handle_scoop(obj)
         order.scoop1_done = p.leaps
       elseif (order.scoop2_done == 0) and (obj.flavor == wildcard_scoop or obj.flavor == order.scoop2) then
         order.scoop2_done = p.leaps
-      else
+      elseif (not order.scored) then
         p.state = dead
       end
     end
