@@ -465,10 +465,11 @@ function handle_order_scoring(o)
 end
 
 function draw_order(o)
-  if o.scored then return end
-  -- draw in truck
-  spr(scoop_sprite(o.scoop2), 116, 112)
-  spr(scoop_sprite(o.scoop1), 110, 112)
+  if not o.scored then
+    -- draw in truck
+    spr(scoop_sprite(o.scoop2), 116, 112)
+    spr(scoop_sprite(o.scoop1), 110, 112)
+  end
 
   if o.scoop1_done then
     if o.scoop1_done > 0 then
