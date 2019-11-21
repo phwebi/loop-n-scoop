@@ -435,6 +435,7 @@ function add_order()
     scoop2 = flr(rnd(4)),
     scoop1_done = 0,
     scoop2_done = 0,
+    scored = false,
   }
 
   add(orders, o)
@@ -443,13 +444,19 @@ function add_order()
 end
 
 function handle_order(o)
-  if o.scoop1_done > 0 and o.scoop2_done > 0 then
-    p.score += 1
-    del(orders, o)
-
+  if o.scored then
     if o.scoop1_done == o.scoop2_done then
       add_scoop(wildcard_scoop)
     end
+
+    del(orders, o)
+  end
+end
+
+function handle_order_scoring(o)
+  if not o.scored and o.scoop1_done > 0 and o.scoop2_done > 0 then
+    p.score += 1
+    o.scored = true
 
     if p.score%5 == 0 then
       add_present()
@@ -728,6 +735,7 @@ function update_play()
     foreach(enemies, handle_enemy)
     foreach(enemies, handle_enemy_movement)
     foreach(presents, handle_present)
+    foreach(orders, handle_order_scoring)
   end
 
   if p.score > best then
