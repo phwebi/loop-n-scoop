@@ -687,7 +687,11 @@ function update_play()
     handle_player_movement()
     if btnp(btn_z) then setup_aim() end -- press z to aim
 
-    if #orders < 1 then add_order() end
+    if #orders < 1 then
+      add_order()
+    else
+      foreach(orders, handle_order)
+    end
     if #scoops < min(3 + flr(p.score/2), max_scoops) then
       add_scoop()
     end
@@ -723,7 +727,6 @@ function update_play()
     foreach(scoops, handle_float_movement)
     foreach(enemies, handle_enemy)
     foreach(enemies, handle_enemy_movement)
-    foreach(orders, handle_order)
     foreach(presents, handle_present)
   end
 
