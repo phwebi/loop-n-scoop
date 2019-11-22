@@ -777,7 +777,6 @@ function draw_play()
   circfill(circ_orig,circ_orig,circ_r,1)
   circ(circ_orig, circ_orig, circ_r, 6)
 
-
   foreach(presents, draw_actor)
   foreach(scoops, draw_actor)
   foreach(enemies, draw_actor)
@@ -790,6 +789,7 @@ function draw_play()
 
   foreach(orders, draw_order)
 
+  print("ticket " .. p.completed_orders+1, 50, 4, 13)
   print("X" .. (p.combos+1),117,4,13)
 
   print("score",2,111,2)
