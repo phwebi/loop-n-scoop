@@ -296,6 +296,8 @@ function init_play()
     leaps = 0,
     powerup = -1,
     power_active = -1,
+    combos = 0,
+    completed_orders = 0,
   }
   p.x, p.y = ang_to_pl_coord(0)
 
@@ -445,21 +447,23 @@ end
 
 function handle_order(o)
   if o.scored then
-    if o.scoop1_done == o.scoop2_done then
-      add_scoop(wildcard_scoop)
-    end
-
+    if (o.scoop1_done == o.scoop2_done) add_scoop(wildcard_scoop)
     del(orders, o)
   end
 end
 
 function handle_order_scoring(o)
   if not o.scored and o.scoop1_done > 0 and o.scoop2_done > 0 then
-    p.score += 1
+    p.completed_orders +=1
+    p.score += (p.combos + 1)
     o.scored = true
 
-    if p.score%5 == 0 then
-      add_present()
+    if (p.completed_orders%5 == 0) add_present()
+
+    if (o.scoop1_done == o.scoop2_done) then
+      p.combos +=1
+    else
+      p.combos = 0
     end
   end
 end
@@ -638,7 +642,7 @@ function enemy_speed_mod()
   if p.powerup == slow_time then
     return slow_time_mod
   end
-  return (p.score + 2)/2
+  return (p.score + 10)/10
 end
 
 function handle_enemy_movement(enemy)
@@ -801,6 +805,8 @@ function draw_play()
   spr(truck_sprite, 89, 106, truck_w, truck_h)
 
   foreach(orders, draw_order)
+
+  print("X" .. (p.combos+1),117,4,13)
 
   print("score",2,111,2)
   local d1=flr(p.score/100)
