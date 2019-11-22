@@ -693,7 +693,7 @@ function update_play()
     else
       foreach(orders, handle_order)
     end
-    if (#scoops < min(3 + flr(p.score/2), max_scoops)) add_scoop()
+    if (#scoops < 3) add_scoop()
   elseif (p.state == aiming) then
     handle_player_movement()
     if btnp(btn_x) then -- press x to cancel
