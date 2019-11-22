@@ -133,9 +133,7 @@ function update_title()
     selected = min(1, selected+1)
   end
  
-  if (bp() and wipe==0) then
-    wipe=1
-  end
+  if (bp() and wipe==0) wipe=1
  
   if (wipe>0) then
     wipe+=1
@@ -212,7 +210,7 @@ function init_help()
 end
 
 function update_help()
-  if bp() then swap_state(title_state) end
+  if (bp()) swap_state(title_state)
 
   if btnp(left) then
     page = max(0, page-1)
@@ -332,8 +330,8 @@ function regulate_aim()
   local max_a = max_aim_angle()
   local min_a = min_aim_angle()
 
-  if min_a < 0 then min_a = min_a + 1 end
-  if max_a > 1 then max_a = max_a - 1 end
+  if (min_a < 0) min_a = min_a + 1
+  if (max_a > 1) max_a = max_a - 1
 
   if max_a > min_a then
     if p.aim > max_a then
@@ -358,9 +356,7 @@ function animate_player(sprite_start, sprite_end)
     p.timer = 0
   end
 
-  if p.sprite > sprite_end then
-    p.sprite = sprite_start
-  end
+  if (p.sprite > sprite_end) p.sprite = sprite_start
 end
 
 function handle_player_movement()
@@ -369,7 +365,7 @@ function handle_player_movement()
 
   if (btn(left)) then
     angle+=angular_speed
-    if angle > 1 then angle = 0 end
+    if (angle > 1) angle = 0
     
     p.ccw = true
     updated = true
@@ -377,9 +373,9 @@ function handle_player_movement()
     p.aim+=angular_speed
     regulate_aim()
   elseif (btn(right)) then
-    if angle == 0 then angle = 1 end
+    if (angle == 0) angle = 1
     angle-=angular_speed
-    if angle < 0 then angle = 1 end
+    if (angle < 0) angle = 1
 
     p.ccw = false
     updated = true
@@ -388,7 +384,7 @@ function handle_player_movement()
     regulate_aim()
   end
 
-  if not updated then return end
+  if (not updated) return
   
   animate_player(p_sprite_start, p_sprite_end)
 
@@ -423,9 +419,7 @@ function handle_present(present)
     del(presents, present)
     p.powerup = present.type
 
-    if p.powerup == slow_time then
-      p.power_active = 600
-    end
+    if (p.powerup == slow_time) p.power_active = 600
   end
 end
 
@@ -475,19 +469,11 @@ function draw_order(o)
     spr(scoop_sprite(o.scoop1), 110, 112)
   end
 
-  if o.scoop1_done then
-    if o.scoop1_done > 0 then
-      spr(scoop_done_sprite, 112, 100)
-    else
-      spr(scoop_waiting_sprite, 112, 100)
-    end
-  end
+  local status_ind = o.scoop1_done > 0 and scoop_done_sprite or scoop_waiting_sprite
+  spr(status_ind, 112, 100)
 
-  if o.scoop2_done > 0 then
-    spr(scoop_done_sprite, 119, 100)
-  else
-    spr(scoop_waiting_sprite, 119, 100)
-  end
+  status_ind = o.scoop2_done > 0 and scoop_done_sprite or scoop_waiting_sprite
+  spr(status_ind, 119, 100)
 end
 
 function scoop_sprite(scoop)
@@ -584,7 +570,7 @@ end
 function animate_float(o)
   o.timer += 1
 
-  if o.timer == 2*bob_wait then o.timer = 0 end
+  if (o.timer == 2*bob_wait) o.timer = 0
 
   if (o.timer == 0) then
     o.y+=1
@@ -639,9 +625,7 @@ function handle_enemy(enemy)
 end
 
 function enemy_speed_mod()
-  if p.powerup == slow_time then
-    return slow_time_mod
-  end
+  if (p.powerup == slow_time) return slow_time_mod
   return (p.score + 10)/10
 end
 
@@ -650,16 +634,14 @@ function handle_enemy_movement(enemy)
     angle = pl_coord_to_ang(enemy.x, enemy.y)
     angle+=min(seal_speed * enemy_speed_mod(), 0.008)
 
-    if angle > 1 then angle = 0 end
+    if (angle > 1) angle = 0
 
     enemy.x, enemy.y = ang_to_pl_coord(angle)
     enemy.flip = enemy.y < circ_orig
   elseif enemy.type == shark then
     x = enemy.x + min(shark_speed * enemy_speed_mod(), 1)
 
-    if enemy.flip then
-      x = enemy.x - min(shark_speed * enemy_speed_mod(), 1)
-    end
+    if (enemy.flip) x = enemy.x - min(shark_speed * enemy_speed_mod(), 1)
 
     if on_circle(circ_orig, circ_orig, x, enemy.y, circ_r - 7) then
       enemy.flip = not enemy.flip
@@ -680,9 +662,7 @@ function animate_enemy(enemy)
       enemy.timer = 0
     end
 
-    if enemy.sprite > enemy.sprite_end then
-      enemy.sprite = enemy.sprite_start
-    end
+    if (enemy.sprite > enemy.sprite_end) enemy.sprite = enemy.sprite_start
   end
 end
 
@@ -698,16 +678,14 @@ function update_play()
 
   if (p.state == moving) then
     handle_player_movement()
-    if btnp(btn_z) then setup_aim() end -- press z to aim
+    if (btnp(btn_z)) setup_aim()
 
     if #orders < 1 then
       add_order()
     else
       foreach(orders, handle_order)
     end
-    if #scoops < min(3 + flr(p.score/2), max_scoops) then
-      add_scoop()
-    end
+    if (#scoops < min(3 + flr(p.score/2), max_scoops)) add_scoop()
   elseif (p.state == aiming) then
     handle_player_movement()
     if btnp(btn_x) then -- press x to cancel
@@ -747,10 +725,10 @@ function update_play()
   if p.score > best then
     broke_high = true
 
-    if p.state == dead then dset(0,p.score) end
+    if (p.state == dead) dset(0,p.score)
   end
 
-  if p.state == dead then swap_state(end_state) end
+  if (p.state == dead) swap_state(end_state)
 end
 
 function draw_actor(a)
@@ -770,9 +748,7 @@ function draw_aim()
 
   while in_circle(circ_orig, circ_orig, x, y, p_radius) do
     -- draw path
-    if i%5 == 0 then
-      circfill(x, y, 1, 12)
-    end
+    if (i%5 == 0) circfill(x, y, 1, 12)
 
     x+=leap_speed * cos(p.aim)
     y+=leap_speed * sin(p.aim)
@@ -849,9 +825,7 @@ end
 function update_end()
   t+=1
  
-  if (bp() and wipe==0) then
-    wipe=1
-  end
+  if (bp() and wipe==0) wipe=1
  
   if (wipe>0) then
     wipe+=1
@@ -981,15 +955,9 @@ function collide_pixel(o1,o2,xoff,yoff)
       local x1, y1, x2, y2 = x+x1off, y+y1off, x+x2off, y+y2off
       local a, b = SPRITE_TRANSPARENT_COLOR, SPRITE_TRANSPARENT_COLOR
 
-      if (x1 <= x1_end) and (y2 <= y1_end) then
-        a = sget(sh1.x + x1, sh1.y + y1)
-      end
-
-      if (x2 <= x2_end) and (y2 <= y2_end) then
-        b = sget(sh2.x + x1, sh2.y + y1)
-      end
-
-      if(a != SPRITE_TRANSPARENT_COLOR and b != SPRITE_TRANSPARENT_COLOR) then collision_count += 1 end
+      if ((x1 <= x1_end) and (y2 <= y1_end)) a = sget(sh1.x + x1, sh1.y + y1)
+      if ((x2 <= x2_end) and (y2 <= y2_end)) b = sget(sh2.x + x1, sh2.y + y1)
+      if(a != SPRITE_TRANSPARENT_COLOR and b != SPRITE_TRANSPARENT_COLOR) collision_count += 1
     end
   end
 
