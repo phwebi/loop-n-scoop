@@ -795,13 +795,8 @@ function draw_play()
   foreach(enemies, draw_actor)
 
   draw_actor(p)
-  if p.powerup == shield and p.power_active > 0 then
-    circ(p.x, p.y, 5, 9)
-  end
-
-  if p.state == aiming then
-    draw_aim()
-  end
+  if (p.powerup == shield and p.power_active > 0) circ(p.x+1, p.y+1, 5, 12)
+  if (p.state == aiming) draw_aim()
 
   spr(truck_sprite, 89, 106, truck_w, truck_h)
 
@@ -823,8 +818,11 @@ function draw_play()
   if p.power_active < 0 then
     pal(9, 13)
     pal(10, 6)
+  else
+    if (p.powerup == slow_time) print(flr(p.power_active/30), 15, 5, 13)
   end
-  if p.powerup >=0 then spr(present_sprites_start + p.powerup, 4, 4) end
+
+  if (p.powerup >=0) spr(present_sprites_start + p.powerup, 4, 4)
 
   pal()
 end
