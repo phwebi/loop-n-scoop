@@ -205,7 +205,7 @@ title_state = {
 
 -- help state
 function init_help()
-  goal, powerups, controls = 0, 1, 2
+  goal, combos, powerups, controls = 0, 1, 2, 3
   page = goal
 end
 
@@ -213,9 +213,9 @@ function update_help()
   if (bp()) swap_state(title_state)
 
   if btnp(left) then
-    page = max(0, page-1)
+    page = max(goal, page-1)
   elseif btnp(right) then
-    page = min(2, page+1)
+    page = min(controls, page+1)
   end
 end
 
@@ -239,10 +239,18 @@ function draw_help()
     spr(scoop_sprite(2), 62, 46)
     print("COLLECT ONLY FLAVORS NEEDED",9,70,8)
     print("FOR YOUR NEXT ORDER - OR DIE.",9,80,8)
-    print("SPAWN WILDCARDS",9,95,8)
-    spr(scoop_sprite(wildcard_scoop),68,94)
-    print("BY GETTING",80,95,8)
-    print("AN ORDER IN 1 MOVE.",9, 105,8)
+  elseif page == combos then
+    printo("combos",10,10,7,8)
+    print("GET COMBOS BY COMPLETING",9,20,8)
+    print("AN ORDER IN 1 MOVE.",9, 28,8)
+    print("THIS WILL SPAWN WILDCARDS.",9,40,8)
+    spr(scoop_sprite(wildcard_scoop),112,39)
+
+    printo('consecutive combos',9,60,7,8)
+    print('WILL INCREASE POINTS RECIEVED',9,70,8)
+    print('FROM EACH COMPLETED ORDER.',9,78,8)
+    print('THIS WILL RESET AFTER A',9,88,8)
+    print('COMBO STREAK HAS ENDED.',9,96,8)
   elseif page == powerups then
     printo("powerups",10,10,7,8)
     print("A POWERUP SPAWNS FOR EVERY 5",9,20,8)
