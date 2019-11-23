@@ -451,6 +451,7 @@ function handle_order(o)
   if o.scored then
     if (o.scoop1_done == o.scoop2_done) add_scoop(wildcard_scoop)
     del(orders, o)
+    add_order()
   end
 end
 
@@ -686,12 +687,8 @@ function update_play()
     handle_player_movement()
     if (btnp(btn_z)) setup_aim()
 
-    if #orders < 1 then
-      add_order()
-    else
-      foreach(orders, handle_order)
-    end
-    if (#scoops < 3) add_scoop()
+    foreach(orders, handle_order)
+    if (#scoops < min(3 + flr(p.completed_orders/3), max_scoops)) add_scoop()
   elseif (p.state == aiming) then
     handle_player_movement()
     if btnp(btn_x) then -- press x to cancel
