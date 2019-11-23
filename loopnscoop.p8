@@ -510,7 +510,7 @@ function handle_scoop(obj)
         order.scoop1_done = p.leaps
       elseif (order.scoop2_done == 0) and (obj.flavor == wildcard_scoop or obj.flavor == order.scoop2) then
         order.scoop2_done = p.leaps
-      else
+      elseif not (obj.flavor == wildcard_scoop) then
         p.state = dead
       end
     end
