@@ -308,7 +308,7 @@ function init_play()
   p.x, p.y = ang_to_pl_coord(0)
 
   orders = {}
-  floaters = {}
+  -- floaters = {}
   scoops = {}
   scoop_counts = {0,0,0,0,0}
   enemies = {}
@@ -503,7 +503,7 @@ function add_scoop(flavor)
   o.x, o.y = rand_point_in_circle(circ_orig, circ_orig, circ_r - 8)
   scoop_counts[o.flavor+1] += 1
   add(scoops, o)
-  add(floaters, o)
+  -- add(floaters, o)
 end
 
 function handle_scoop(obj)
@@ -522,7 +522,7 @@ function handle_scoop(obj)
     end
 
     del(scoops, obj)
-    del(floaters, obj)
+    -- del(floaters, obj)
     scoop_counts[obj.flavor+1] -= 1
     sfx(scoop_sound)
   end
@@ -535,7 +535,7 @@ function dotpart(vx,vy,nx,ny)
   return vx,vy
 end
 
-function handle_float_movement(o)
+function handle_scoop_movement(o)
   local ovx = p.powerup != slow_time and o.vx or o.vx * slow_time_mod
   local ovy = p.powerup != slow_time and o.vy or o.vy * slow_time_mod
   o.x += ovx
@@ -552,7 +552,7 @@ function handle_float_movement(o)
     o.y += o.vy
   end
 
-  for f in all(floaters) do
+  for f in all(scoops) do
     local dx = o.x-f.x
     local dy = o.y-f.y
     local sqrdist = dx*dx+dy*dy
@@ -578,10 +578,10 @@ function handle_float_movement(o)
     end
   end
 
-  animate_float(o)
+  animate_scoop(o)
 end
 
-function animate_float(o)
+function animate_scoop(o)
   o.timer += 1
 
   if (o.timer == 2*bob_wait) o.timer = 0
@@ -725,7 +725,7 @@ function update_play()
   end
 
   if not (p.state == dead) then
-    foreach(scoops, handle_float_movement)
+    foreach(scoops, handle_scoop_movement)
     foreach(enemies, handle_enemy)
     foreach(enemies, handle_enemy_movement)
     foreach(presents, handle_present)
