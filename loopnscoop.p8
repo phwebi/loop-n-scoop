@@ -44,9 +44,9 @@ local moving, aiming, leaping, dead = 0, 1, 2, 3
 bob_wait = 10
 
 -- scoops
+local strawberry, vanilla, blue, choco, wild = 0,1,2,3,4
 scoop_sprites_start = 2
 scoop_sprites_end = 8
-wildcard_scoop = 4
 scoop_sound = 0
 
 scoop_waiting_sprite = 9
@@ -244,7 +244,7 @@ function draw_help()
     print("GET COMBOS BY COMPLETING",9,20,8)
     print("AN ORDER IN 1 MOVE.",9, 28,8)
     print("THIS WILL SPAWN WILDCARDS.",9,40,8)
-    spr(scoop_sprite(wildcard_scoop),112,39)
+    spr(scoop_sprite(wild),112,39)
 
     printo('consecutive combos',9,60,7,8)
     print('WILL INCREASE POINTS RECIEVED',9,70,8)
@@ -310,6 +310,7 @@ function init_play()
   orders = {}
   floaters = {}
   scoops = {}
+  scoop_counts = {0,0,0,0,0}
   enemies = {}
   presents = {}
 
@@ -443,13 +444,16 @@ function add_order()
   }
 
   add(orders, o)
-  add_scoop(o.scoop1)
-  add_scoop(o.scoop2)
+  if (scoop_counts[o.scoop1+1] < 1) add_scoop(o.scoop1)
+
+  local required = 1
+  if (o.scoop2 == o.scoop1) required = 2
+  if (scoop_counts[o.scoop2+1] < required) add_scoop(o.scoop2)
 end
 
 function handle_order(o)
   if o.scored then
-    if (o.scoop1_done == o.scoop2_done) add_scoop(wildcard_scoop)
+    if (o.scoop1_done == o.scoop2_done) add_scoop(wild)
     del(orders, o)
     add_order()
   end
@@ -497,27 +501,30 @@ function add_scoop(flavor)
   }
   o.sprite = scoop_sprites_start + o.flavor
   o.x, o.y = rand_point_in_circle(circ_orig, circ_orig, circ_r - 8)
-
+  scoop_counts[o.flavor+1] += 1
   add(scoops, o)
   add(floaters, o)
 end
 
 function handle_scoop(obj)
   if collide(obj, p) then
-    sfx(scoop_sound)
-    if #orders > 0 then
-      local order = orders[1]
-      if (order.scoop1_done == 0) and (obj.flavor == wildcard_scoop or obj.flavor == order.scoop1) then
-        order.scoop1_done = p.leaps
-      elseif (order.scoop2_done == 0) and (obj.flavor == wildcard_scoop or obj.flavor == order.scoop2) then
-        order.scoop2_done = p.leaps
-      elseif not (obj.flavor == wildcard_scoop) then
-        p.state = dead
-      end
+    if (orders == 0) return
+
+    local order = orders[1]
+    if (order.scored) return
+
+    if (order.scoop1_done == 0) and (obj.flavor == wild or obj.flavor == order.scoop1) then
+      order.scoop1_done = p.leaps
+    elseif (order.scoop2_done == 0) and (obj.flavor == wild or obj.flavor == order.scoop2) then
+      order.scoop2_done = p.leaps
+    elseif not order.scored then
+      p.state = dead
     end
 
     del(scoops, obj)
     del(floaters, obj)
+    scoop_counts[obj.flavor+1] -= 1
+    sfx(scoop_sound)
   end
 end
 
